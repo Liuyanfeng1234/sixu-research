@@ -1,0 +1,225 @@
+# V19 安全考卷库（公开版）
+
+> 公开版说明：本文件为 V19 智能体安全审计项目「每日安全考卷」库的公开快照。
+> - 版本：2026-11-17 版（正文与内部正本逐字节一致，差异仅本头部注记）
+> - 统计时点：2026-11-17 15:49 CST
+> - 条目数：24 条（EXAM-20261111-01 至 EXAM-20261117-03）
+> - 核验状态分布（按条目「核验状态」字段计）：预测命中 2／事后覆盖 13／未覆盖 9
+> - 成熟度标注：数据集（持续更新中）。覆盖核验为规则覆盖级静态核验，非端到端实跑；统计深度有限，不构成统计结论。
+> - 许可：CC-BY-4.0（署名 Sixu AI / V19 智能组织）
+> - 源文件 sha256（内部正本）：ff53b777cc4ef18cb4ed716aae4f3a9419e4a876a98760ff310c150fa9eedaec
+
+---
+
+# V19 安全考卷库
+
+记账规则：每条含事件与类别｜考题（可核的期望）｜标准（期望的检出方式）｜核验状态｜核验证据落点。核验状态只用四档原词：未核／预测命中／事后覆盖／未覆盖。
+诚实口径（写死）：覆盖核验是规则覆盖级静态核验，不是实跑；V19 尚未端到端实跑，任何条目不得表述为「实跑通过」。「预测命中」须检查引入时点（PR 号/合并日期）早于事件公开日且证据齐备，才写入战绩表「预测中了什么」栏。
+
+---
+
+## EXAM-20261111-01
+
+- 事件与类别：Microsoft「Lazarus」休眠神经元权重后门（Lazare, veni foras）｜供应链｜公开日 2026-11-10（厂商博客 2026-11-10T23:00:00Z）｜来源 https://www.microsoft.com/en-us/security/blog/2026/11/10/detecting-sleeper-agents-hiding-in-ai-model-neurons/
+- 考题：给定案例——模型 checkpoint 相对其声明的基座模型仅有少于 10 个神经元的权重向量大幅偏离、余部为弥散小幅变化，该模型通过全部行为评测，但上下文出现触发串时输出攻击者命令并由智能体以自身权限执行——V19 应判定为供应链完整性失败（fail），不得因行为评测通过而放行；期望 finding 引用被检 checkpoint 的权重差分证据。
+- 标准：应有一条在册检查对模型工件做「与声明基座的权重差分异常检测／来源校验」并命中。现头四插件与管线校验面无此检查：管线输入模式无模型工件类型；rules.py 的插件 sha256 钉只核规则代码字节与声明哈希一致，属相邻的代码完整性面，不核模型权重。
+- 核验状态：事后覆盖
+- 核验证据落点：主链现头 fbd6efc8481073f1dad415d7d791e172131cf46e（cursor/production-did-labels-e95a）下 research/audit_pipeline 经 fetch.py 实取 11 件全文检索（字节存 hidden_files/security-exam-2026-11-11/tree/）：grep weight/checkpoint/provenance 仅命中评分权重语义（nonfinite_score 的 numeric-weight-input），无模型工件检查。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-11」）。
+- 复核注记（2026-11-13）：SE1 原版插件已随 PR #311 合入主链（合并提交 73cf5658、2026-11-12T12:53:37Z；现头 418efeb3 实取 plugins/model_artifact_integrity.py 8,274 B、sha256 a0ced410… 与原钉版全等），但 loop 第 77 轮在主链实跑证实其两项阻断（矛盾摘要构造仍 PASS、巨值 outliers 致 Overflow 逃逸判定），修复版 0.1.1 未合入；按 SE1 残余口径，本条状态维持「未覆盖」，修复 PR 合入后另核。
+- 复核（2026-11-14，loop 第 106 轮，backlog N23 残余）：修复版已随 PR #331 合入主链（合并提交 463bf2f4f7fff7f61e42182b3be4a68af5a13630、2026-11-13T13:06:32Z，list_commits 实读；同头 harness run 43427509089 success 在协作图 loop-se1 节点在册）。主链现头 463bf2f4 实取确认 plugins/model_artifact_integrity.py 在册（VERSION 0.1.5、RULE_ID v19.supply_chain.model_artifact_integrity，14,115 B、sha256 28c9191d…）；组装闭包实跑：作者套件 37/37 通过、独立探针 16/16 与第 88 轮修复预期逐格全等（原两项阻断——矛盾摘要单神经元/全离群、巨值 Overflow 逃逸——均判 inconclusive 不逃逸；集中偏离构造判 fail 并引用差分证据、弥散变化判 pass 不误报）、负对照（0.1.0 旧插件＋新套件）14 例失败判别成立、全目录回归坏名集与基线逐名全等、acceptance 输出与基线逐字一致。检查引入时点（原版 2026-11-12、修复版 2026-11-13）均晚于事件公开日（2026-11-10），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-106/work/（fetch_main 三件、probe_main_out.json、discover 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑。
+
+## EXAM-20261111-02
+
+- 事件与类别：CVE-2026-83953 GitHub Copilot for JetBrains 插件命令注入（CWE-77）｜其他（命令注入）｜公开日 2026-11-10（微软 11 月发布批）｜来源 https://theinjection.dev/items/github-copilot-jetbrains-cve-2026-83953/
+- 考题：给定案例——AI 编程插件把未经中和的输入拼入本地命令，低权限本地攻击者可读取插件可达的本地信息——V19 应检出「命令构造未中和特殊元素」并判 fail，finding 须引用被检命令构造证据。
+- 标准：应有一条在册检查对被审工件/展品中的命令构造与特殊元素中和做判定。现头四插件（cache 回放准入／授权索引缺失／实测零／非有限分数）均不覆盖；tests/test_command_safety.py 是管线自身 CLI 的输出安全测试、不是对案例的检查规则，不计覆盖。
+- 核验状态：事后覆盖
+- 核验证据落点：同 EXAM-20261111-01 的现头实取面全文检索：grep subprocess/shell/allowlist/newline 在规则面仅命中 manifest 的 path_escape（路径逃逸校验）与插件的转义控制符扫描（针对证据字段、非命令构造），无命令注入检查。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-11」）。
+- 复核（2026-11-13，backlog N23）：主链现头 418efeb3e9f35e2864c37f0a2729159192ab9a80 实取确认 plugins/command_injection.py 在册（RULE_ID v19.command_injection.unneutralized_construction，7,999 B、sha256 00375e26…，与 SE2 第 58 轮钉版全等），经 PR #312 合入（合并提交 7576007e、2026-11-12T10:20:43Z，list_commits 实读）；检查引入时点（2026-11-12）晚于事件公开日（2026-11-10），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/security-exam-2026-11-13/tree/plugins/command_injection.py。
+
+## EXAM-20261111-03
+
+- 事件与类别：CVE-2026-119990 Azure OpenAI 关键功能缺失认证（CWE-306，CVSS 9.8）｜权限越界｜公开日 2026-11-10（微软 11 月发布批）｜来源 https://theinjection.dev/items/azure-openai-missing-authentication-cve/
+- 考题：给定案例——托管 AI 服务的关键功能缺失认证，未授权网络攻击者可提权——V19 应检出「关键功能无认证检查」并判 fail（权限越界），finding 须引用被检功能的认证缺失证据。
+- 标准：应有一条在册检查对被审对象的认证存在性做判定。现头两条 authorization 主题规则只核「供给的授权声明」：v19.authorization.incomplete_index_negative 核索引完整性与 reported_authorized 的一致性、v19.authorization.measured_zero_normal 核 ceiling 声明表；两者文件头均明示不核目标代码或实时授权，证据模式无认证存在性字段，故不覆盖本类别。
+- 核验状态：事后覆盖
+- 核验证据落点：同上现头实取面：plugins/index_absence.py 文件头「This checks supplied evidence declarations, never an index on disk, target code, or live authorization」；plugins/measured_zero_normal.py 字段集（declared_principal/ceiling_value/value_source/principal_status/undeclared_status）无认证存在性字段。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-11」）。
+- 复核（2026-11-13，backlog N23）：主链现头 418efeb3e9f35e2864c37f0a2729159192ab9a80 实取确认 plugins/missing_authentication.py 在册（RULE_ID v19.authentication.missing_for_critical_function，7,774 B、sha256 cedab4c5…，与 SE3 第 59 轮钉版全等），经 PR #313 合入（合并提交 ce9e83aa、2026-11-12T10:15:55Z，list_commits 实读）；检查引入时点（2026-11-12）晚于事件公开日（2026-11-10），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/security-exam-2026-11-13/tree/plugins/missing_authentication.py。
+
+## EXAM-20261112-01
+
+- 事件与类别：CVE-2026-100307 Amazon mcp-gateway-registry 外部管理 API 缺失授权｜权限越界｜公开日 2026-11-11（AWS 披露，受影响版本 1.0.9–1.24.7）｜来源 https://www.itsecuritynews.info/it-security-news-roundup-2026-11-11-evening/
+- 考题：给定案例——已认证的普通用户经外部管理 API 给自己赋予 registry 管理员 scope 并接管全部已注册网关资产，被审对象的授权强制在该操作上缺失——V19 应判定为权限越界失败（fail），不得因调用方已认证而放行；期望 finding 引用被检管理操作的授权缺失证据。
+- 标准：应有一条在册检查对被审对象的「管理操作授权强制／scope 授予不可自赋」做判定。现头两条 authorization 主题规则只核供给的授权声明（v19.authorization.incomplete_index_negative 核索引完整性与 reported_authorized 一致性、字段集仅 index_complete/reported_authorized；v19.authorization.measured_zero_normal 核 ceiling 声明表），文件头明示不核目标代码或实时授权，证据模式无管理操作授权字段；本地已建未合入的 SE3 检查核的是关键功能认证「存在性」（authentication），与本件的已认证后授权自赋（authorization）不是同一缺陷，不计覆盖。
+- 核验状态：事后覆盖
+- 核验证据落点：主链现头 61abb0d27892f054e725da4094e0bddc4d3645aa（cursor/production-did-labels-e95a）下 research/audit_pipeline 经 fetch.py 实取 11 件全文检索（字节存 hidden_files/security-exam-2026-11-12/tree/）：grep scope/administrator/self-assign 在插件与 rules.py/contract.py/evidence.py 中无管理授权命中（仅有 inconclusive 理由串中的 scope 词）；plugins/index_absence.py 字段集与文件头自述如上。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-12」，SE4）。
+- 复核（2026-11-14，loop 第 107 轮，backlog N31）：SE4 检查已随 PR #327 合入主链（落地提交 cb16d21e、2026-11-12T19:26:47Z；合并提交 d8ebc5593f4a5202d9836ee6999aed84824b1fb1、2026-11-13T07:08:13Z，list_commits 实读）。主链现头 463bf2f4 实取确认 plugins/missing_authorization.py 在册（VERSION 0.1.0、RULE_ID v19.authorization.missing_for_management_operation，8,741 B、sha256 0ceca36c…，与 SE4 第 72 轮钉版逐字节全等；套件 9,086 B 4303b31c…、文档 4,736 B b83bfda1… 同全等）；组装闭包实跑：作者套件 17/17 通过、独立探针 16/16 合预期（管理操作授权 absent 判 fail 并引用操作证据、可自赋 scope 判 fail、强制完备三机制判 pass 不误报、未检视/证据缺失/枚举非法/状态机制矛盾均判 inconclusive 不冒充）、负对照（删插件）收集期 1 ERROR 判别成立、突变（self_assignable fail→pass）恰红 1、全目录回归坏名集与第 106 轮基线逐名全等、acceptance 输出与基线逐字一致。检查引入时点（2026-11-12/13）晚于事件公开日（2026-11-11），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-107/work/（fetch_main 三件、probe_new_out.json、discover 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑；插件只判供给的已检视操作摘要、不解析目标源码、不探活服务。
+
+## EXAM-20261112-02
+
+- 事件与类别：CVE-2026-125926 Amazon mcp-gateway-registry 服务器注册/更新 API SSRF｜其他（SSRF）｜公开日 2026-11-11（AWS 公告 2026-180-AWS，11/11/2026 13:00 PST；受影响 >=1.0.3 且 <=1.34.0，1.35.0 修复）｜来源 https://www.itsecuritynews.info/cve-2026-125926-server-side-request-forgery-in-the-server-registration-and-update-api-in-mcp-gateway-registry/
+- 考题：给定案例——已认证远程用户经服务器注册/更新 API 提交构造请求，使网关服务端向内网服务与云实例元数据端点发请求并把响应读回——V19 应检出「服务端按调用方指定目标发起请求且无目标约束」并判 fail，finding 须引用被检请求目标证据。
+- 标准：应有一条在册检查对被审对象的出站请求目标约束（内网/元数据端点拦截或目标 allowlist）做判定。现头四插件无一涉及出站请求或 URL 目标；管线校验面全文检索 ssrf/urllib/requests/http.client/169.254 零命中（metadata 仅命中 contract.py 的失败缓冲元数据常量，与网络无关）。
+- 核验状态：未覆盖
+- 核验证据落点：同 EXAM-20261112-01 的现头实取面全文检索（hidden_files/security-exam-2026-11-12/tree/）：上述关键词在 11 件中除 contract.py 缓冲元数据常量外无命中；四插件 RULE_ID 清单（cache/authorization×2/numeric）无网络面规则。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-12」，SE5）。
+
+## EXAM-20261112-03
+
+- 事件与类别：MCP 参考服务器 @modelcontextprotocol/server-filesystem 校验后符号链接交换竞态（GHSA-7m4x-rv66-mxhh move_file 源路径未钉住／GHSA-p9cv-8g75-4xcg read_text_file 校验后符号链接交换，同批发布合并为一条）｜沙箱逃逸｜公开日 2026-11-11（维护者公告 07:24/07:28 UTC；受影响 <2.3.0 及日期版 <=2026.8.31，2.3.0 修复）｜来源 https://patchwire.monowire.dev/alerts/GHSA-7m4x-rv66-mxhh 与 https://patchwire.monowire.dev/alerts/GHSA-p9cv-8g75-4xcg
+- 考题：给定案例——文件工具先校验路径落在 allowedDirectories 内、随后使用时不钉住已校验对象，本地进程在校验与使用之间把父目录换成外指符号链接，读/移操作最终落在允许目录之外——V19 应检出「校验与使用非同一对象（check/use 竞态）致目录边界逃逸」并判 fail，finding 须引用被检路径处理证据；校验后钉住同一描述符/实路径的构造应不误报。
+- 标准：应有一条在册检查对被审案例的路径校验—使用一致性做判定。现头四插件无路径处理主题；管线自身读取面确有同族自护（manifest.py 单 fd O_NOFOLLOW 有界读、rules.py realpath 钉住、manifest/pipeline 拒绝符号链接），但那是管线保护自身输入的机制、不是对被审案例作判定的检查规则，按 EXAM-20261111-02 对 test_command_safety 的同一口径不计覆盖。
+- 核验状态：事后覆盖
+- 核验证据落点：同上现头实取面全文检索：symlink/realpath/NOFOLLOW 命中全部落在 manifest.py、rules.py、pipeline.py、acceptance.py 与 cache_replay_admission.py 的管线自护代码（拒绝/钉住管线自己的文件），四插件字段集无路径校验—使用一致性字段、无对应 RULE_ID。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-12」，SE6）。
+- 复核（2026-11-17，loop 第 189 轮，backlog SE6）：SE6 检查已随 PR #333 合入主链（合并提交 3602900291157218133626b475f69d175bffc54a、2026-11-17T03:04:01Z，list_commits 实读；批准依据 DEC-20261117-W001）。主链现头 cf0c293709134df2879ac5b671ebe5ad9fdde4f7 实取确认 plugins/path_validation_pinning.py 在册（RULE_ID v19.filesystem.path_validation_without_pinning，9,797 B、sha256 e72499c2…，与 SE6 第 80 轮钉版逐字节全等；套件 9,831 B cf8c10eb…、文档 5,548 B 46dc83d9… 同全等）；组装闭包实跑：作者套件 18/18 通过、独立探针 18 命名格＋B 组 24 格全枚举与第 90/175 轮逐格全等（GHSA 未钉住重开格判 fail 并引用路径证据、钉住同一对象判 pass 不误报、未校验/证据缺失判 inconclusive 不冒充、判定步 8 出现 0 次）、负对照（删插件）收集期 1 ERROR 判别成立、突变（fail→pass）恰红 5 条、全目录回归 Ran 961→979（恰 +18）坏名集 7 名逐名全等、acceptance 两树逐字一致。检查引入时点（2026-11-17 合入）晚于事件公开日 2026-11-11，故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-189/work/（fetch_main 三件、probe_main_out.json、se6/discover/acc 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑；插件只判供给的已检视操作摘要、不解析目标源码、不打开目标文件系统、不观察实际操作。
+
+## EXAM-20261113-01
+
+- 事件与类别：CVE-2026-123139 Opera Neon MCP Hub 通信通道来源未验证（CWE-940，GHSA-2f45-6797-cj93）｜权限越界｜公开日 2026-11-12（Opera 厂商公告，GitHub Advisory Database 同日收录）｜来源 https://security.opera.com/en/improper-verification-of-source-of-a-communication-channel-opera-security-advisories/
+- 考题：给定案例——智能体浏览器的命令通道（MCP Hub）不验证命令发送方身份，同一浏览器内已安装的任意扩展都能冒充合法 MCP 客户端、向内置 Browser Operator 发命令并接管实时浏览会话——V19 应判定为通道来源验证失败（fail），不得因发送方「在浏览器内部」而放行；期望 finding 引用被检通道的来源验证证据；通道对发送方身份做验证且未验证来源被拒的构造应不误报。
+- 标准：应有一条在册检查对被审对象的「工具/命令通道发送方身份验证」做判定。现头 7 插件无一涉及命令通道来源：全文检索 extension/channel/sender/origin 在 14 件实取面零命中（origin 仅无关词面）；相邻的 v19.authentication.missing_for_critical_function 核的是关键功能的认证存在性、不是通道内发送方冒充，不计覆盖。
+- 核验状态：事后覆盖
+- 核验证据落点：主链现头 418efeb3e9f35e2864c37f0a2729159192ab9a80（cursor/production-did-labels-e95a）下 research/audit_pipeline 经 fetch.py 实取 14 件全文检索（字节存 hidden_files/security-exam-2026-11-13/tree/）：上述关键词零命中，7 插件 RULE_ID 清单无通道来源主题。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-13」，SE8）。
+- 复核（2026-11-15，loop 第 137 轮，backlog N44）：SE8 检查已随 PR #351 合入主链（合并提交 f7d3382e7d23707b5f07c81baaf6700668576119、2026-11-14T23:52:35Z，list_commits 实读）。主链现头 09b708943e12c641d5a57fa8087ff979f4be78ab 实取确认 plugins/channel_sender_verification.py 在册（RULE_ID v19.channel.unverified_command_sender，9,741 B、sha256 8a73e03a…，与 SE8 第 97 轮钉版逐字节全等；套件 10,964 B 39e679d3…、文档 5,597 B a9ff9498… 同全等）；组装闭包实跑：作者套件 23/23 通过、独立探针 12/12 合预期（absent 本体格判 fail 并引用来源验证证据、verified∧accepted 判 fail、verified∧rejected 判 pass 不误报、四 unknown 与两矛盾格及未检视来源格判 inconclusive 不冒充）、全枚举 864 格 fail 54／pass 36／inconclusive 774 与第 96 轮冻结原型逐项全等、负对照（删插件）收集期 1 ERROR 判别成立、突变（absent fail→pass）恰红 5 条记录、全目录回归 Ran 823/坏名集 64 与基线逐名全等、acceptance 产出与基线逐字一致。检查引入时点（2026-11-14 合入）晚于事件公开日（2026-11-12），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-137/work/（fetch_main 三件、probe_se8_out.json、probe_enum_out.json、discover 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑；插件只判供给的已检视通道摘要、不解析目标源码、不探活通道。
+
+## EXAM-20261113-02
+
+- 事件与类别：CVE-2026-126197 pgEdge Postgres MCP Server 自定义 pl-do 工具参数 SQL 注入（CWE-89，GHSA-r5pp-jx86-r6r9）｜其他（SQL 注入）｜公开日 2026-11-12（CVE 记录 2026-11-12T18:17:24Z 发布；受影响 <1.1.0、1.1.0 修复）｜来源 https://github.com/pgEdge/pgedge-postgres-mcp/security/advisories/GHSA-r5pp-jx86-r6r9
+- 考题：给定案例——MCP 工具把调用方 JSON 参数以固定分隔标签（dollar-quote）插值拼入 SQL DO 块且不校验参数是否含该标签，参数可闭合 DO 块、注入任意 SQL 语句并绕过 read_only、以连接角色权限读写——V19 应检出「参数插值进 SQL 构造且分隔符/特殊元素未中和」并判 fail，finding 须引用被检 SQL 构造证据；参数走绑定参数（bind parameters）传递的构造应不误报。
+- 标准：应有一条在册检查对被审对象的 SQL 构造参数中和/绑定做判定。现头全文检索 sql/postgres/statement 在 14 件实取面零命中；相邻的 v19.command_injection.unneutralized_construction 只判 shell 命令构造（字段集 execution_mode=shell_string/argv_list、executable_id），其证据模式装不下 SQL 插值构造，不计覆盖。
+- 核验状态：事后覆盖
+- 核验证据落点：同 EXAM-20261113-01 的现头实取面全文检索（hidden_files/security-exam-2026-11-13/tree/）：sql 相关关键词零命中；plugins/command_injection.py 文件头与字段集自述限于 command construction（shell string/argv list）。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-13」，SE9）。
+- 复核（2026-11-15，loop 第 138 轮，backlog N45）：SE9 检查已随 PR #352 合入主链（合并提交 8e6a3bf887e7a0a71afe4dab550d75bba137ca34、2026-11-15T00:17:33Z，list_commits 实读）。主链现头 71baeecbfce9b0146fcf0e4805753fe26f66c94a 实取确认 plugins/sql_construction_neutralization.py 在册（RULE_ID v19.sql_injection.unneutralized_parameter_interpolation，9,983 B、sha256 261e69d9…，与 SE9 第 100 轮钉版逐字节全等；套件 10,608 B 8e971a99…、文档 5,888 B 07f52725… 同全等）；组装闭包实跑：作者套件 22/22 通过、独立探针 12/12 合预期（CVE 分隔符格与无中和格判 fail 并引用 SQL 构造证据、绑定参数格判 pass 不误报、矛盾与四 unknown 格判 inconclusive 不冒充）、全枚举 288 格 fail 6／pass 60／inconclusive 222 与第 99 轮冻结原型逐项全等、负对照（删插件）收集期 1 ERROR 判别成立、突变（delimiter fail→pass）恰红 2 条、全目录回归 Ran 856/坏名集 64 与基线逐名全等、acceptance 产出与基线逐字一致。检查引入时点（2026-11-15 合入）晚于事件公开日（2026-11-12），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-138/work/（fetch_main 三件、probe_se9_out.json、probe_enum_se9_out.json、discover 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑；插件只判供给的已检视 SQL 构造摘要、不解析目标源码、不连数据库、不执行 SQL。
+
+## EXAM-20261113-03
+
+- 事件与类别：CVE-2026-126196 pgEdge Postgres MCP Server query_database 语句走私绕过 read_only（CWE-89/CWE-693，GHSA-j7mp-839j-jrm7）｜权限越界｜公开日 2026-11-12（CVE 记录 2026-11-12T18:17:24Z 发布；受影响 <1.1.0、1.1.0 修复）｜来源 https://github.com/pgEdge/pgedge-postgres-mcp/security/advisories/GHSA-j7mp-839j-jrm7
+- 考题：给定案例——工具声称 read_only 边界，但未识别语句走无绑定参数的简单查询协议、一次请求可塞多条分号分隔语句，调用方结合事务/会话状态变更即可写库，且连接池会话状态可使后续调用保持可写——V19 应检出「只读/权限边界的强制可被多语句走私绕过」并判 fail，finding 须引用被检边界强制证据；单语句协议＋写模式语句拒收＋会话状态回池复位的构造应不误报。
+- 标准：应有一条在册检查对被审对象的「声明边界（只读/限权）的实际强制完整性——多语句/状态变更通道是否被关死」做判定。现头全文检索 read_only/readonly 在 14 件实取面零命中；两条 authorization 规则只核供给的授权声明、missing_authentication 只核关键功能认证存在性，均不核边界强制面，不计覆盖。
+- 核验状态：事后覆盖
+- 核验证据落点：同 EXAM-20261113-01 的现头实取面全文检索（hidden_files/security-exam-2026-11-13/tree/）：read_only 相关关键词零命中，7 插件无边界强制主题。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-13」，SE10）。
+- 复核（2026-11-15，loop 第 138 轮，backlog N45）：SE10 检查已随 PR #353 合入主链（合并提交 09b708943e12c641d5a57fa8087ff979f4be78ab、2026-11-15T00:46:21Z，list_commits 实读）。主链现头 71baeecbfce9b0146fcf0e4805753fe26f66c94a 实取确认 plugins/statement_boundary_enforcement.py 在册（RULE_ID v19.boundary.declared_statement_boundary_not_enforced，11,084 B、sha256 3f3ad55d…，与 SE10 第 102 轮钉版逐字节全等；套件 11,472 B 620056d4…、文档 6,672 B 39ff2e3a… 同全等）；组装闭包实跑：作者套件 25/25 通过、独立探针 16/16 合预期（CVE 未识别语句格与多语句走私格判 fail 并引用边界强制证据、单语句＋拒收＋会话复位构造判 pass 不误报、五 unknown 与两一致性格及未检视来源格判 inconclusive 不冒充）、全枚举 432 格 fail 30／pass 10／inconclusive 392 与第 101 轮冻结原型逐项全等、负对照（删插件）收集期 1 ERROR 判别成立、突变（multi_statement fail→pass）恰红 3 条、全目录回归 Ran 856/坏名集 64 与基线逐名全等、acceptance 产出与基线逐字一致。检查引入时点（2026-11-15 合入）晚于事件公开日（2026-11-12），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-138/work/（fetch_main 三件、probe_se10_out.json、probe_enum_se10_out.json、discover 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑；插件只判供给的已检视边界强制摘要、不解析目标源码、不连数据库、不执行语句、不探活连接池。
+
+## EXAM-20261114-01
+
+- 事件与类别：CVE-2026-68905 Hugo Blog 未认证 AI 代理滥用服务端 API 密钥（CWE-306，GHSA-pj75-r769-qjv2）｜权限越界｜公开日 2026-11-13（CVE 记录 2026-11-13T19:21:26Z 发布）｜来源 https://github.com/lanshi17/hugo_blog/security/advisories/GHSA-pj75-r769-qjv2
+- 考题：给定案例——AI 助手代理把三个端点（POST /api/blog-assistant、/api/blog-search-embedding、/api/blog-search-rerank）以运营方服务端 API 密钥转发上游 LLM/embedding/rerank 接口、且端点无任何认证检查，未认证远程调用方即可无限消耗运营方配额——V19 应判定为关键功能缺失认证失败（fail），不得因端点「只是代理转发」而放行；期望 finding 引用被检端点的认证缺失证据；端点认证存在（present）的构造应不误报，认证证据缺失（unknown）应判 inconclusive 不冒充 fail。
+- 标准：应有一条在册检查对被审对象的认证存在性做判定。现头在册 v19.authentication.missing_for_critical_function（plugins/missing_authentication.py，VERSION 0.1.0）正是此检查：已检视摘要中关键功能＋exposure internet/internal_network＋authentication_status absent＋method none 判 fail（missing_authentication_for_critical_function），字段集（function_id/endpoint_id/criticality/exposure/authentication_status/authentication_method/inspection_source）装得下本案例的端点级摘要；本案例端点以服务端密钥行使付费上游调用、属关键功能口径与 EXAM-20261111-03（Azure OpenAI CWE-306）同型。
+- 核验状态：预测命中
+- 核验证据落点：主链现头 0f56f92b4f8288fa2ffc8ad2ab324861c2cb1656（cursor/production-did-labels-e95a）下经连接器实取 plugins/missing_authentication.py 在册（7,774 B、sha256 cedab4c5…，与 SE3 第 59 轮钉版全等，字节存 hidden_files/security-exam-2026-11-14/tree/plugins/）；检查引入时点＝PR #313 合入（合并提交 ce9e83aa、2026-11-12T10:15:55Z，见本库 EXAM-20261111-03 复核注记），早于事件公开日 2026-11-13；事件来源＝GHSA-pj75-r769-qjv2／CVE 记录 2026-11-13T19:21:26Z。已写入战绩表「预测中了什么」栏（2026-11-14 条）。诚实口径不变：此为规则覆盖级静态核验（在册检查＋字段/判定口径对表），非实跑。
+
+## EXAM-20261114-02
+
+- 事件与类别：CVE-2026-110279 IBM ContextForge MCP Gateway 上游凭据被调用方请求头覆盖（CWE-287）｜权限越界｜公开日 2026-11-13（CVE 记录 2026-11-13T21:43:43Z 发布）｜来源 https://www.ibm.com/support/pages/node/7296490
+- 考题：给定案例——网关始终把调用方 X-Upstream-Authorization 请求头改名为 Authorization 转发上游，已认证用户可替换网关托管的上游凭据、使上游请求以另一凭据发出并绕过逐用户权限与审计归属——V19 应检出「网关托管凭据可被调用方供给值覆盖」并判 fail，finding 须引用被检凭据处理证据；调用方供给的凭据头被剥离/忽略、只用网关托管凭据的构造应不误报。
+- 标准：应有一条在册检查对被审对象的「上游凭据来源不可被调用方覆盖」做判定。现头 10 插件无此检查：全文检索 credential/override 在实取面零命中（header 仅命中各插件的展品头格式校验）；相邻的 v19.authentication.missing_for_critical_function 核的是认证「存在性」（absent 才 fail），本件认证存在、缺陷在覆盖，不计覆盖；v19.authorization.missing_for_management_operation 核管理操作授权强制，亦装不下凭据覆盖面。
+- 核验状态：事后覆盖
+- 核验证据落点：主链现头 0f56f92b4f8288fa2ffc8ad2ab324861c2cb1656 下 research/audit_pipeline 经连接器实取 15 件全文检索（字节存 hidden_files/security-exam-2026-11-14/tree/）：10 插件 RULE_ID 清单无凭据处理主题，上述关键词零命中。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-14」，SE11）。
+- 复核（2026-11-15，loop 第 136 轮，backlog N43）：SE11 检查已随 PR #365 合入主链（落地提交 70e497a3552f873d9815b266535416185647d4f5、2026-11-14T10:06:37Z；合并提交 f3503e5f25ceef7ed508d42fde97c093f1941374、2026-11-14T14:28:28Z，list_commits 实读）。主链现头 f7d3382e 实取确认 plugins/gateway_credential_override.py 在册（RULE_ID v19.gateway.caller_overridable_managed_credential，11,206 B、sha256 c6223c92…，与 SE11 第 118 轮钉版逐字节全等；套件 11,571 B 7dce106a…、文档 7,011 B d0b00292… 同全等）；组装闭包实跑：作者套件 25/25 通过、独立探针 12/12 合预期（renamed 改名转发本体格判 fail 并引用凭据处理证据、forwarded 判 fail、stripped＋managed_only 判 pass 不误报、absent 判 pass、三 unknown 与两一致性矛盾格判 inconclusive 不冒充）、负对照（删插件）收集期 1 ERROR 判别成立、突变（renamed fail→pass）恰红 5 条记录、全目录回归 Ran 776/坏名集 64 与基线逐名全等、acceptance 输出与基线逐字一致。检查引入时点（2026-11-14）晚于事件公开日（2026-11-13），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-136/work/（fetch_main 三件、probe_se11_out.txt、discover 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑；插件只判供给的已检视凭据处理摘要、不解析目标源码、不探活网关、不发凭据请求。
+
+## EXAM-20261114-03
+
+- 事件与类别：CVE-2026-110195＋CVE-2026-110178 IBM ContextForge MCP Gateway 授权强制 specificity 不足绕过（CWE-287／CWE-284，同批发布合并为一条）｜权限越界｜公开日 2026-11-13（CVE 记录 2026-11-13T21:43:18Z／21:44:00Z 发布）｜来源 https://www.ibm.com/support/pages/node/7296695 与 https://www.ibm.com/support/pages/node/7296701
+- 考题：给定案例——授权强制存在但键/范围不够具体：①token 交换缓存键未绑足凭据维度，同一用户的缓存上游 token 可跨其不同凭据复用、绕过凭据级授权策略；②批量导入只核 team 级权限、不核被改对象的租户归属，持 admin.import 者可覆写他租户公开工具/资源/提示的端点与凭据——V19 应检出「授权强制的键/范围 specificity 不足」并判 fail，finding 须引用被检缓存键/导入范围证据；缓存键绑定完整凭据维度、导入按对象归属逐项核权的构造应不误报。
+- 标准：应有一条在册检查对被审对象的「授权缓存键 specificity／跨租户对象级范围核权」做判定。现头无此检查：v19.authorization.missing_for_management_operation 只判授权 absent 与 scope 可自赋两格，本两件均为 enforced 但 specificity 不足、按其判定序会 pass，不计覆盖；v19.cache.unversioned_replay 判的是审计报告缓存的版本绑定（字段集 cache_entry_version_field/served_idempotent/分数面），与上游 token 缓存键无关，不计覆盖；全文检索 tenant 在插件面零命中。
+- 核验状态：事后覆盖
+- 核验证据落点：同 EXAM-20261114-02 的现头实取面全文检索（hidden_files/security-exam-2026-11-14/tree/）：missing_authorization.py 判定序与 cache_replay_admission.py 文件头/字段集自述如上。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-14」，SE12）。
+- 复核（2026-11-15，loop 第 136 轮，backlog N43）：SE12 检查已随 PR #364 合入主链（落地提交 e98f2055284535d41593195cd931a8fb83f6ba59、2026-11-14T10:04:50Z；合并提交 fb5a7cd6f18bf98bd42de43e95b1f8a1b032c1bf、2026-11-14T16:44:38Z，list_commits 实读）。主链现头 f7d3382e 实取确认 plugins/authorization_specificity.py 在册（RULE_ID v19.authorization.insufficient_enforcement_specificity，10,822 B、sha256 9ff8a0bf…，与 SE12 第 120 轮钉版逐字节全等；套件 10,696 B 21896293…、文档 6,720 B 201d9d0f… 同全等）；组装闭包实跑：作者套件 25/25 通过、独立探针 16/16 合预期（缓存键 user_only 本体格判 fail 并引用键证据、partial 判 fail、full 判 pass 不误报；导入面 team_level_only 本体格判 fail、none 判 fail、per-object 判 pass；unknown/跨面污染/not_applicable 矛盾格判 inconclusive 不冒充）、负对照（删插件）收集期 1 ERROR 判别成立、突变（user_only fail→pass）恰红 3 条记录、全目录回归 Ran 776/坏名集 64 与基线逐名全等、acceptance 输出与基线逐字一致。检查引入时点（2026-11-14）晚于事件公开日（2026-11-13），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-136/work/（fetch_main 三件、probe_se12_out.txt、discover 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑；插件只判供给的已检视 specificity 摘要、不解析目标源码、不探活网关、不执行 token 交换/批量导入。
+
+## EXAM-20261114-04
+
+- 事件与类别：CVE-2026-110278 IBM ContextForge MCP Gateway 身份传播声明可重放／敏感身份信息暴露给第三方 MCP 服务器（CWE-294）｜数据泄露｜公开日 2026-11-13（CVE 记录 2026-11-13T21:43:09Z 发布）｜来源 https://www.ibm.com/support/pages/node/7296489
+- 考题：给定案例——网关向第三方 MCP 服务器传播身份时使用静态签名载荷且工具调用时缺逐网关配置检查，攻击者可重放身份传播声明签名、或使敏感用户身份信息被暴露给第三方服务器——V19 应检出「身份声明可重放／身份信息向非预期接收方暴露」并判 fail，finding 须引用被检身份传播证据；签名载荷绑一次性/时效与逐网关检查完备的构造应不误报。
+- 标准：应有一条在册检查对被审对象的「身份声明防重放／身份信息暴露面」做判定。现头 10 插件无此主题：全文检索 replay 仅命中 v19.cache.unversioned_replay（审计报告缓存回放准入，与身份声明无关）、exposure 仅命中 missing_authentication 的 exposure 字段（网络暴露面枚举，非信息暴露判定），均不计覆盖。
+- 核验状态：事后覆盖
+- 核验证据落点：同 EXAM-20261114-02 的现头实取面全文检索（hidden_files/security-exam-2026-11-14/tree/）。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-14」，SE13）。
+- 复核（2026-11-15，loop 第 146 轮，backlog N52）：SE13 检查已随 PR #371 合入主链（合并提交 7d81581b516fae8b1fc4a5aa21a664278940dbe1、2026-11-15T07:12:34Z，list_commits 实读）。主链现头 9ad4cbe978afd63006fc7b61ded6bd1464cee2f5 实取确认 plugins/identity_assertion_propagation.py 在册（RULE_ID v19.identity.unchecked_assertion_propagation，10,099 B、sha256 92faa3a0…，与 SE13 第 122 轮钉版逐字节全等；套件 11,117 B 43b2524c…、文档 6,217 B 89a9829f… 同全等）；组装闭包实跑：作者套件 25/25 通过、全枚举 81 格 fail 14／pass 2／inconclusive 65 与第 121 轮冻结原型逐格全等失配 0（静态可重放载荷判 fail 并引用身份传播证据、绑一次性/时效＋逐接收方检查＋最小披露＋预期接收方判 pass 不误报、证据缺失判 inconclusive 不冒充）、负对照（删插件）收集期 1 ERROR 判别成立、突变（static_reusable fail→pass）恰红 3 条、全目录回归 Ran 928/坏名集 64 与基线逐名全等、acceptance 产出与基线逐字一致。检查引入时点（2026-11-15 合入）晚于事件公开日（2026-11-13），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-146/work/（fetch_main 三件、probe_se13_out.txt、discover 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑；插件只判供给的已检视身份传播摘要、不解析目标源码、不探活网关、不实际重放声明。
+
+## EXAM-20261114-05
+
+- 事件与类别：CVE-2026-110194 IBM ContextForge MCP Gateway SSRF（CWE-918）｜其他（SSRF）｜公开日 2026-11-13（CVE 记录 2026-11-13T21:44:24Z 发布）｜来源 https://www.ibm.com/support/pages/node/7296696
+- 考题：给定案例——已认证攻击者可使 MCP 网关系统向未授权目标发出请求（厂商描述未给具体端点与目标约束细节）——V19 应检出「服务端按调用方影响的目标发起请求且无目标约束」并判 fail，finding 须引用被检请求目标证据；带目标 allowlist/内网拦截的构造应不误报。
+- 标准：应有一条在册检查对被审对象的出站请求目标约束做判定，即 EXAM-20261112-02 的 SE5 检查（v19.network.ssrf_unconstrained_egress）。该检查至今未合入主链：现头 10 插件无 ssrf_egress.py（实取插件清单坐实），其落地 PR #332 仍未合并；相邻的 v19.outbound.trace_policy_consistency（SE7）按 backlog N25 既定归属自述不担 SSRF 覆盖、不计覆盖。
+- 核验状态：未覆盖
+- 核验证据落点：同 EXAM-20261114-02 的现头实取面（hidden_files/security-exam-2026-11-14/tree/plugins/ 清单无 ssrf_egress.py）。缺口与 EXAM-20261112-02 同一缺口、已在 loop backlog 在队区 SE5，本条不重复入队，仅在 SE5 条下补记本事件为新增同型实证。
+
+## EXAM-20261114-06
+
+- 事件与类别：CVE-2026-94407＋CVE-2026-110189 IBM ContextForge MCP Gateway 守卫名单不完整致拒绝服务（CWE-1333／CWE-184，同批发布合并为一条）｜其他（拒绝服务）｜公开日 2026-11-13（CVE 记录 2026-11-13T21:43:35Z／21:43:26Z 发布）｜来源 https://www.ibm.com/support/pages/node/7296667 与 https://www.ibm.com/support/pages/node/7296697
+- 考题：给定案例——网关对用户供给的可执行模式/过滤器只做名单式守卫且名单不完整：①工具 JSON Schema 的 pattern 字段可嵌入灾难性回溯正则、参数校验时无界耗 CPU；②jq jsonpath_filter 的禁用名单漏 halt/halt_error/无界循环内建函数，可终止 worker 或持续耗资源——V19 应检出「用户供给模式/过滤器的守卫完整性不足（危险构造未被拒且无复杂度/资源上限）」并判 fail，finding 须引用被检守卫证据；守卫完备且带复杂度/执行上限的构造应不误报。
+- 标准：应有一条在册检查对被审对象的「用户供给模式/过滤器守卫完整性＋资源上限」做判定。现头 10 插件无此主题：全文检索 regex/jq/halt/denial 在实取面零命中；各插件自身的输入字节上限是管线自护、不是对被审案例的判定，按 EXAM-20261112-03 同一口径不计覆盖。
+- 核验状态：事后覆盖
+- 核验证据落点：同 EXAM-20261114-02 的现头实取面全文检索（hidden_files/security-exam-2026-11-14/tree/）。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-14」，SE14）。
+- 复核（2026-11-15，loop 第 146 轮，backlog N52）：SE14 检查已随 PR #369 合入主链（合并提交 abc0e3dd1e5c61a407a645c277561d5a47709d89、2026-11-15T06:22:33Z，list_commits 实读）。主链现头 9ad4cbe978afd63006fc7b61ded6bd1464cee2f5 实取确认 plugins/supplied_pattern_filter_guard.py 在册（RULE_ID v19.guard.user_supplied_pattern_filter_incomplete_guard，10,605 B、sha256 bf181a86…，与 SE14 第 125 轮钉版逐字节全等；套件 11,620 B ebfbfdfa…、文档 6,568 B 223c384a… 同全等）；组装闭包实跑：作者套件 26/26 通过、全枚举 108 格 fail 10／pass 2／inconclusive 96 与第 123 轮冻结原型逐格全等失配 0（危险构造被不完整名单守卫放行判 fail 并引用守卫证据、守卫完备＋资源上限判 pass 不误报、证据缺失判 inconclusive 不冒充）、负对照（删插件）收集期 1 ERROR 判别成立、突变（at_least_one_allowed fail→pass）恰红 4 条、全目录回归 Ran 928/坏名集 64 与基线逐名全等、acceptance 产出与基线逐字一致。检查引入时点（2026-11-15 合入）晚于事件公开日（2026-11-13），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-146/work/（fetch_main 三件、probe_se14_out.txt、discover 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑；插件只判供给的已检视模式/过滤器守卫摘要、不解析目标源码、不执行供给模式。
+
+## EXAM-20261114-07
+
+- 事件与类别：CVE-2026-127214 Flowise Custom Function 沙箱 SSRF 保护绕过（CWE-918）｜其他（SSRF）｜公开日 2026-11-13（CVE 记录 2026-11-13T19:27:24Z 发布）｜来源 https://github.com/soovwv/cve/blob/main/research/flowise-ssrf-bypass-via-subpath-import.md
+- 考题：给定案例——已认证攻击者以 allowlist 包的子路径 require 模块（axios/dist/node/axios.cjs 等），绕过沙箱 mock 表拿到未包装的 HTTP 客户端、跳过 deny-list 校验，可达环回/内网与云元数据端点——V19 应检出「SSRF 保护可被同包子路径导入绕过（保护只覆盖被包装的客户端、未覆盖同等可达的出站通道）」并判 fail，finding 须引用被检出站通道证据；全部出站通道均经同一 deny-list 校验的构造应不误报。
+- 标准：应有一条在册检查对被审对象的出站目标约束做判定，即 SE5 检查（v19.network.ssrf_unconstrained_egress）——但须注记本件的子型：SE5 冻结口径判的是「无约束出站」，本件是「有保护但保护覆盖面不完整」，其 mixed/拦截后可达类格能否装下「子路径客户端拦截后仍可达私网」须在 SE5 落地复核时一并核；SE5 至今未合入主链（同 EXAM-20261114-05），本条仍判未覆盖。outbound_trace（SE7）不担 SSRF 覆盖、不计。
+- 核验状态：未覆盖
+- 核验证据落点：同 EXAM-20261114-05 的现头插件清单实证（hidden_files/security-exam-2026-11-14/tree/plugins/ 无 ssrf_egress.py）。缺口与 EXAM-20261112-02 同一缺口、已在 loop backlog 在队区 SE5，本条不重复入队，仅在 SE5 条下补记本事件与「保护覆盖面不完整」子型。
+
+## EXAM-20261114-08
+
+- 事件与类别：vLLM 调用方多媒体参数无服务端上限致资源耗尽/崩溃五件（CVE-2026-126399 CWE-770／CVE-2026-126397 CWE-400／CVE-2026-126396 CWE-770／CVE-2026-126394 CWE-770／CVE-2026-126398 CWE-617，同批发布合并为一条）｜其他（资源耗尽/拒绝服务）｜公开日 2026-11-13（CVE 记录 2026-11-13T09:35:48–52Z 同批发布）｜来源 https://github.com/vllm-project/vllm/security/advisories/GHSA-vxqj-p4gw-9h4c（余 GHSA-9g3c-x747-c6wr／GHSA-w4cg-mhc7-mgw3／GHSA-894j-wg8m-63h8／GHSA-5q78-j82c-2vr2）
+- 考题：给定案例——推理服务把请求级多媒体参数（num_frames=-1/巨值、max_patches、min_pixels）无服务端上限/范围校验地转发给解码与预处理，或对仅含 prompt_embeds 的请求形状不校验即触发可达断言崩溃——V19 应检出「调用方控制的尺寸/计数参数缺服务端上限（及请求形状缺校验）致资源耗尽/崩溃」并判 fail，finding 须引用被检参数处理证据；参数带服务端上限与范围校验、异常形状被拒的构造应不误报。
+- 标准：应有一条在册检查对被审对象的「调用方参数资源上限/范围校验」做判定。现头 10 插件无此主题：全文检索 resource/exhaustion/num_frames/max_patches 在实取面零命中；v19.numeric.nonfinite_score 只判分数有限性、不是资源上限判定，不计覆盖。
+- 核验状态：事后覆盖
+- 核验证据落点：同 EXAM-20261114-02 的现头实取面全文检索（hidden_files/security-exam-2026-11-14/tree/）。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-14」，SE15）。
+- 复核（2026-11-15，loop 第 147 轮，backlog N53）：SE15 检查已随 PR #375 合入主链（合并提交 9ad4cbe978afd63006fc7b61ded6bd1464cee2f5、2026-11-15T08:34:30Z，list_commits 实读）。主链现头 9ad4cbe978afd63006fc7b61ded6bd1464cee2f5 实取确认 plugins/caller_parameter_resource_limit.py 在册（RULE_ID v19.resource.caller_parameter_without_server_limit，10,977 B、sha256 972af3d2…，与 SE15 第 129 轮钉版逐字节全等；套件 11,768 B e38d9093…、文档 6,327 B ebcc7dc0… 同全等）；组装闭包实跑：作者套件 21/21 通过、全枚举 192 格 fail 6／pass 6／inconclusive 180 与第 128 轮冻结原型逐格全等失配 0（size 面无上限判 fail 并引用参数处理证据、shape 面异常形状未校验判 fail、带上限与范围校验且异常形状被拒判 pass 不误报、证据缺失判 inconclusive 不冒充）、负对照（删插件）收集期 1 ERROR 判别成立、突变（size 面 unbounded fail→pass）恰红 3 条、全目录回归 Ran 928/坏名集 64 与基线逐名全等、acceptance 产出与基线逐字一致。检查引入时点（2026-11-15 合入）晚于事件公开日（2026-11-13），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-147/work/（fetch_main 三件、probe_enum_out.json、discover 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑；插件只判供给的已检视参数处理摘要、不解析目标源码、不向目标服务发请求、不做资源耗尽实测，pass 不认证上限数值本身合理性。
+
+## EXAM-20261114-09
+
+- 事件与类别：CVE-2026-126395 vLLM 错误信息清洗不完整泄露堆地址（CWE-532，GHSA-m9fg-w9qh-67pc）｜数据泄露｜公开日 2026-11-13（CVE 记录 2026-11-13T09:35:51Z 发布）｜来源 https://github.com/vllm-project/vllm/security/advisories/GHSA-m9fg-w9qh-67pc
+- 考题：给定案例——错误信息清洗函数 sanitize_message() 的正则只处理小写形式，大写 PIL 图像地址漏清洗，未认证攻击者以特制 PNG 触发处理器错误即可从外返错误信息中读到实时堆地址——V19 应检出「外返错误信息的敏感内容清洗不完整（大小写/变体漏网）」并判 fail，finding 须引用被检清洗证据；清洗覆盖全部变体或错误信息不外返细节的构造应不误报。
+- 标准：应有一条在册检查对被审对象的「错误信息外返清洗完整性」做判定。现头 10 插件无此主题：全文检索 sanitize/heap/disclosure 在实取面零命中；管线自身对证据字段的控制符转义扫描是自护、不是对被审案例的判定，不计覆盖。
+- 核验状态：未覆盖
+- 核验证据落点：同 EXAM-20261114-02 的现头实取面全文检索（hidden_files/security-exam-2026-11-14/tree/）。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-14」，SE16）。
+
+## EXAM-20261114-10
+
+- 事件与类别：CVE-2026-110199 IBM ContextForge MCP Gateway Web UI DOM 型 XSS（CWE-79）｜其他（XSS）｜公开日 2026-11-13（CVE 记录 2026-11-13T21:43:52Z 发布）｜来源 https://www.ibm.com/support/pages/node/7296694
+- 考题：给定案例——MCP 网关 Web UI 未中和特权用户供给的内容，任意 JavaScript 可被嵌入页面并在可信会话内执行、可能致凭据披露——V19 应检出「Web UI 对供给内容的脚本中和缺失」并判 fail，finding 须引用被检渲染/中和证据；供给内容经转义/中和后渲染的构造应不误报。
+- 标准：应有一条在册检查对被审对象的「UI 渲染内容中和」做判定。现头 10 插件无此主题：全文检索 xss/cross-site 在实取面零命中；相邻的 v19.command_injection.unneutralized_construction 只判 shell 命令构造、不是 UI 脚本中和，不计覆盖。本条为通用 Web 面缺口、优先级低于智能体/工具面各条，照实入队待 loop 排期定夺。
+- 核验状态：未覆盖
+- 核验证据落点：同 EXAM-20261114-02 的现头实取面全文检索（hidden_files/security-exam-2026-11-14/tree/）。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-14」，SE17）。
+
+## EXAM-20261116-01
+
+- 事件与类别：CVE-2026-125771 AtlasAiDev MCP Server for WordPress 权限分配错误致提权（CWE-266）｜权限越界｜公开日 2026-11-15（CVE 记录 2026-11-15T15:09:09Z 发布，Patchstack CNA；CNA datePublic 字段记 2026-11-13T14:06:53Z、Patchstack 条目页标 13 Nov，本库一贯以 CVE 记录发布时间为公开日口径收录，口径差异记名于此）｜来源 https://patchstack.com/database/wordpress/plugin/ai-workflow-automation-ai-agent-hub/vulnerability/wordpress-mcp-server-for-wordpress-plugin-2-0-3-privilege-escalation-vulnerability?_s_id=cve
+- 考题：给定案例——MCP 插件把权限分配给主体时分配本身错误（被授予的权限集超出该主体应得范围），用户借此提权至管理员级接管站点（受影响 <=2.0.3、2.0.4 修复；Patchstack 泛述低权用户可变管理员，CVE 向量 PR:H，两说并记，公开面无具体端点/机制细节）——V19 应检出「权限分配正确性失败（授予主体的权限集与应得范围不符）」并判 fail，finding 须引用被检权限分配证据；分配与既定应得范围一致的构造应不误报，分配证据缺失（unknown）应判 inconclusive 不冒充 fail。
+- 标准：应有一条在册检查对被审对象的「权限分配正确性（授予时点的主体—权限集对应关系）」做判定。现头相邻检查均不担此面：v19.authorization.missing_for_management_operation 判的是单个管理操作的授权强制缺失（authorization_status absent）与 scope 可自赋（scope_assignment=self_assignable），字段集（operation_id/endpoint_id/operation_class/authorization_status/authorization_mechanism/scope_assignment/inspection_source）核的是操作时点的强制、不是授予时点的分配正确性，且本件公开面无任何操作/强制细节可映射入该字段集；v19.authorization.insufficient_enforcement_specificity 只判 token 交换缓存键与批量导入范围两面；v19.authorization.incomplete_index_negative／measured_zero_normal 只核供给的授权声明；v19.authentication.missing_for_critical_function 只核认证存在性。19 插件全文检索 privilege/assign 命中仅 missing_authorization 文件头的「privileged scope 可自赋」自述与 statement_boundary 的 limited-privilege 声明面，无权限分配正确性主题、无对应 RULE_ID，不计覆盖。
+- 核验状态：未覆盖
+- 核验证据落点：主链现头 9ad4cbe978afd63006fc7b61ded6bd1464cee2f5（cursor/production-did-labels-e95a）下 research/audit_pipeline 经 fetch.py 实取 19 插件全文检索（字节存 hidden_files/security-exam-2026-11-16/tree/plugins/；missing_authorization.py 8,741 B、sha256 0ceca36c… 与 SE4 钉版全等，文件头与字段集自述如上）。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-16」，SE18）。
+
+## EXAM-20261116-02
+
+- 事件与类别：CVE-2026-129356 vLLM Common Prefix KV 缓存管理器竞态条件（CWE-362）｜其他（竞态条件）｜公开日 2026-11-15（CVE 记录 2026-11-15 发布，VulDB CNA；受影响 0.30.0/0.31.0，0.32.0 修复）｜来源 https://cve.blacktree.nl/cve/CVE-2026-129356
+- 考题：给定案例——推理服务的 KV 缓存管理器（single_type_kv_cache_manager.py，Common Prefix 组件）中需要临时独占访问共享资源的并发代码序列缺同步，时序窗口内共享缓存状态可被另一并发序列改写，远程低权调用方在高复杂度条件下可利用（利用已公开）——V19 应检出「共享资源并发访问缺同步（竞态条件）」并判 fail，finding 须引用被检同步证据；共享资源访问有完备同步/锁保护的构造应不误报，同步证据缺失（unknown）应判 inconclusive 不冒充 fail。
+- 标准：应有一条在册检查对被审对象的「共享资源并发同步」做判定。现头 19 插件无此检查：全文检索 race/toctou/synchron/concurren/kv-cache/lock 在 19 件中零命中。相邻面不计覆盖：v19.cache.unversioned_replay 判的是审计报告缓存条目的版本绑定与回放准入（字段集为缓存条目版本/幂等面），与并发同步无关；SE6 路径校验—使用一致性（TOCTOU）检查至今未合入主链（现头插件清单无 path_validation_pinning.py），且其口径只判文件路径校验后钉住、装不下 KV 缓存共享状态同步面。
+- 核验状态：未覆盖
+- 核验证据落点：同 EXAM-20261116-01 的现头实取面全文检索（hidden_files/security-exam-2026-11-16/tree/plugins/）：上述竞态关键词零命中，19 插件 RULE_ID 清单无并发/同步主题，插件目录清单（hidden_files/security-exam-2026-11-16/plugins_list.txt）无 path_validation_pinning.py。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-16」，SE19）。
+
+## EXAM-20261117-01
+
+- 事件与类别：CVE-2026-68934 code-review-mcp-server 命令注入（CWE-78，GHSA-jq3q-62jc-fqq9）｜其他（命令注入）｜公开日 2026-11-16（GHSA／CVE 记录 2026-11-16 发布；受影响 <1.5.3、1.5.3 修复）｜来源 https://github.com/Orcus2021/code-review-mcp-server/security/advisories/GHSA-jq3q-62jc-fqq9
+- 考题：给定案例——代码评审 MCP 服务器的 getLocalGitDiff／codeReview／createPR／getPRTemplate 工具把调用方控制的 folderPath／baseBranch 字符串参数直接插值进 child_process.execSync 经 /bin/sh 执行的命令串、无任何中和，shell 元字符／命令替换／引号逃逸输入可任意命令执行——V19 应检出「命令构造未中和特殊元素」并判 fail，finding 须引用被检命令构造证据；参数以 argv 数组直传（execFileSync、不过 shell，1.5.3 修复法）的构造应不误报，命令构造证据缺失（unknown）应判 inconclusive 不冒充 fail。
+- 标准：应有一条在册检查对被审工件中的命令构造与特殊元素中和做判定。现头在册 v19.command_injection.unneutralized_construction（plugins/command_injection.py，VERSION 0.1.0）正是此检查：文件头明定 fail 模式为「untrusted 输入插值进 shell string 且无中和（或中和漏行分隔符）」、argv 参数化执行不属此模式；字段集（construction_id/executable_id/execution_mode=shell_string|argv_list/input_source/neutralization_method/line_separator_handling/inspection_source）装得下本案例的 execSync shell 串摘要；本案例与 EXAM-20261111-02（Copilot 命令注入 CWE-77）同型。
+- 核验状态：预测命中
+- 核验证据落点：主链现头 9960b9a5d981716556b603c29bc0c0a701ac82f0（cursor/production-did-labels-e95a）下经 fetch.py 实取 plugins/command_injection.py 在册（7,999 B、sha256 00375e26…，与 SE2 第 58 轮钉版全等，字节存 hidden_files/security-exam-2026-11-17/tree/plugins/）；检查引入时点＝PR #312 合入（合并提交 7576007e、2026-11-12T10:20:43Z，见本库 EXAM-20261111-02 复核注记），早于事件公开日 2026-11-16；事件来源＝GHSA-jq3q-62jc-fqq9／NVD CVE-2026-68934（描述与 GHSA 逐字同）。已写入战绩表「预测中了什么」栏（2026-11-17 条）。诚实口径不变：此为规则覆盖级静态核验（在册检查＋字段/判定口径对表），非实跑。
+
+## EXAM-20261117-02
+
+- 事件与类别：CVE-2026-126816 AWS Pricing MCP Server 成本报告生成器路径遍历任意文件写（CWE-22）｜其他（路径遍历）｜公开日 2026-11-16（AWS 公告 2026-184-AWS，Publication Date 11/16/2026 12:00 PM PST；受影响 awslabs.aws-pricing-mcp-server <1.0.31、awslabs.cost-analysis-mcp-server <=1.0.5）｜来源 https://www.itsecuritynews.info/cve-2026-126816-path-traversal-and-arbitrary-file-write-in-the-cost-report-generator-of-aws-pricing-mcp-server/
+- 考题：给定案例——MCP 工具的报告输出路径未限制在预期输出目录内，能影响 MCP 智能体者可经绝对路径或目录遍历序列把调用方可控内容写到预期目录之外的任意位置——V19 应检出「工具文件写出路径未限制在预期目录内」并判 fail，finding 须引用被检写出路径证据；写出路径经规范化后钉在预期目录内、越界路径被拒的构造应不误报，写出路径证据缺失（unknown）应判 inconclusive 不冒充 fail。
+- 标准：应有一条在册检查对被审对象的「文件写出路径目录限制」做判定。现头 19 插件无此检查：全文检索 traversal 在 19 件中零命中；相邻面均不计覆盖——v19.archive.member_plan_consistency／archive_byte_plan 只判供给的归档成员计划（成员名与解包计划一致性），不是工具写出路径判定；SE6 路径校验—使用一致性（TOCTOU 钉住）检查口径不同且至今未合入主链（现头插件清单无 path_validation_pinning.py）；管线自身 manifest 的 path_escape 校验是管线自护、不是对被审案例的判定，按 EXAM-20261111-02 同一口径不计覆盖。
+- 核验状态：未覆盖
+- 核验证据落点：主链现头 9960b9a5d981716556b603c29bc0c0a701ac82f0 下经 fetch.py 实取 19 插件全文检索（字节存 hidden_files/security-exam-2026-11-17/tree/plugins/，清单 hidden_files/security-exam-2026-11-17/plugins_list.txt）：traversal 零命中、19 插件 RULE_ID 清单无路径写出限制主题。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-17」，SE20）。
+
+## EXAM-20261117-03
+
+- 事件与类别：CVE-2026-126681 AWS Labs Timestream for InfluxDB MCP Server 预期端点限制不足（CWE-923）｜其他（端点限制不足）｜公开日 2026-11-16（AWS 公告 2026-185-AWS，Publication Date 11/16/2026 12:30 PM PST；受影响 0.0.12–<0.0.19、0.0.19 修复）｜来源 https://rdintel.com/cve/CVE-2026-126681
+- 考题：给定案例——MCP 服务器的连接配置处理不限制预期端点，未认证者经提示注入把 InfluxDB URL 引入 MCP 客户端上下文，服务器即向攻击者构造端点发起连接并把自身配置的 InfluxDB API 令牌发往该端点——V19 应检出「带凭据的出站连接目标未限制到预期端点（调用方供给端点可达且凭据随连接外送）」并判 fail，finding 须引用被检连接目标证据；连接端点被限制在预期端点集内、调用方供给端点被拒的构造应不误报，目标证据缺失（unknown）应判 inconclusive 不冒充 fail。
+- 标准：应有一条在册检查对被审对象的出站请求目标约束做判定，即 EXAM-20261112-02 的 SE5 检查（v19.network.ssrf_unconstrained_egress）。该检查至今未合入主链：现头 19 插件无 ssrf_egress.py（实取插件清单坐实），其落地 PR #332 仍未合并；相邻的 v19.outbound.trace_policy_consistency（SE7）按 backlog N25 既定归属自述不担 SSRF 覆盖、只判供给 trace 的来源/对端策略一致性，不计覆盖。须注记本件子型：SE5 冻结口径判的是「无约束出站」，本件是「带凭据连接发往调用方供给端点致令牌外送」，其判定格能否装下「凭据随连接发往未预期端点」须在 SE5 落地复核时一并核。
+- 核验状态：未覆盖
+- 核验证据落点：同 EXAM-20261117-02 的现头实取面（hidden_files/security-exam-2026-11-17/tree/plugins/ 清单无 ssrf_egress.py；outbound_trace.py 文件头自述为 SE7 trace 策略一致性）。缺口与 EXAM-20261112-02 同一缺口、已在 loop backlog 在队区 SE5，本条不重复入队，仅在 SE5 条下补记本事件与「带凭据端点外送」子型。
