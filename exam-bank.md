@@ -1,15 +1,15 @@
 # V19 安全考卷库（公开版）
 
 > 公开版说明：本文件为 V19 智能体安全审计项目「每日安全考卷」库的公开快照。
-> - 版本：2026-11-18 版（新增 EXAM-20261118-01／EXAM-20261118-02 两条；勘误 ERR-20261117-01／ERR-20261117-02 沿用在册；正文与内部正本逐字节一致，差异仅本头部注记）
+> - 版本：2026-11-19 版（新增 EXAM-20261119-01 一条；勘误 ERR-20261117-01／ERR-20261117-02 沿用在册；正文与内部正本逐字节一致，差异仅本头部注记）
 > - 勘误（2026-11-17）：EXAM-20261117-01 原判「预测命中」撤销、改判「事后覆盖」（GHSA-jq3q-62jc-fqq9 首次发布日为 2026-07-06，原记 2026-11-16 系全球库收录/CVE 发布日误作首发日）；详见正本该条勘误注记。
 > - 勘误二（2026-11-17，ERR-20261117-02）：EXAM-20261114-01 原判「预测命中」撤销、改判「事后覆盖」（GHSA-pj75-r769-qjv2 首次发布日为 2026-07-05，原记 2026-11-13 系 CVE 记录发布日误作首发日，与勘误一同型）；全库预测命中归零，详见正本该条勘误注记。
-> - 统计时点：2026-11-18 16:26 CST
-> - 条目数：26 条（EXAM-20261111-01 至 EXAM-20261118-02）
-> - 核验状态分布（按条目「核验状态」字段计）：预测命中 0／事后覆盖 15／未覆盖 11
+> - 统计时点：2026-11-19 17:37 CST
+> - 条目数：27 条（EXAM-20261111-01 至 EXAM-20261119-01）
+> - 核验状态分布（按条目「核验状态」字段计）：预测命中 0／事后覆盖 15／未覆盖 12
 > - 成熟度标注：数据集（持续更新中）。覆盖核验为规则覆盖级静态核验，非端到端实跑；统计深度有限，不构成统计结论。
 > - 许可：CC-BY-4.0（署名 Sixu AI / V19 智能组织）
-> - 源文件 sha256（内部正本）：a07762c53e79d0b5a290570d65293e67182583330fe1e4f5f35265383ea8724e
+> - 源文件 sha256（内部正本）：ab003afd5da7a543fc2b7092267f1cd5b6c6aa51e9ce3ba950730c28057165ae
 
 ---
 
@@ -270,3 +270,12 @@
 - 核验状态：未覆盖
 - 影响面：受影响系统/产品类型：LLM 应用构建平台（Flowise 类）的无头浏览器文档加载面，及其可达的内网服务与云元数据端点｜受影响人群：部署运营者（内网/元数据响应以文档内容回读）、与部署同网的其他系统｜国内相关性：同型推断——国内同类加载器/抓取面存在同型面；未见国内同型公开披露。
 - 核验证据落点：同 EXAM-20261118-01 的现头实取面（hidden_files/security-exam-2026-11-18/tree/plugins/ 清单无 ssrf_egress.py；全文检索 ssrf 仅命中 outbound_trace.py 文件头自述、rebind 与 169.254 零命中）。缺口与 EXAM-20261112-02 同一缺口、已在 loop backlog 在队区 SE5，本条不重复入队，仅在 SE5 条下补记本事件与「DNS 重绑定未钉住」子型。
+
+## EXAM-20261119-01
+
+- 事件与类别：CVE-2026-130121 AI Puffer 经 AI 生成评论回复的未认证存储型 XSS（CWE-79；全球库条目 GHSA-x362-9jrm-3rmc 为 CVE 转录）｜其他（XSS／内容中和）｜公开日 2026-11-18（CVE 记录 2026-11-18T03:32:13Z 发布，Wordfence CNA；Wordfence 披露页 Publicly Published 记 November 17, 2026 系美东日期、与 CVE 时点 03:32Z＝美东 11-17 22:32 为同一时刻，故以 CVE 记录时点为首次公开；无仓库级 GHSA——WordPress 插件无 GitHub 仓库公告，全球库条目发布时间 2026-11-18T06:30:36Z 晚于 CVE 记录；受影响 <=2.5.28、2.5.29 修复；研究者 crow）｜来源 https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/gpt3-ai-content-generator/ai-puffer-2528-unauthenticated-stored-cross-site-scripting-via-ai-generated-comment-replies 与 CVE 记录 https://www.cve.org/CVERecord?id=CVE-2026-130121
+- 考题：给定案例——未认证攻击者提交评论、诱使 AI 模型在自动回复中复现 HTML 载荷，插件 insert_comment_reply_logic() 对模型输出净化不足，即经 wp_insert_comment() 存储并绕过 WordPress 正常对评论内容施加的 kses 过滤，存储的脚本在任何用户访问被注入页面时执行（利用前提：管理员已配置 Comment Auto-Reply 自动化且 Action on reply=Approve、攻击者评论已获批准）——V19 应检出「（模型生成等）不可信内容未经中和即存储并在页面渲染」并判 fail，finding 须引用被检内容中和证据；内容经中和／过滤后才存储渲染的构造应不误报，中和证据缺失（unknown）应判 inconclusive 不冒充 fail。
+- 标准：应有一条在册检查对被审对象的「存储／渲染内容中和（来源无关）」做判定。现头 20 插件无此检查：全文检索 xss／cross-site／sanitiz／kses／innerhtml／dom／render／html 在 20 件中全零命中（neutraliz 命中仅 command_injection 与 sql_construction_neutralization 的命令／SQL 构造面，装不下页面内容渲染面，不计覆盖）。相邻的 SE17 检查（v19.web_ui.unneutralized_supplied_content_rendering，EXAM-20261114-10）至今未合入主链（现头插件清单无 web_ui_rendering_neutralization.py）；且其冻结口径的 fail 门以内容来源＝用户供给为条件、系统／模型生成内容未中和属 pass 格——本件内容来源为模型生成（经攻击者评论间接影响），即使 SE17 按现口径合入亦不判 fail，子型分歧须在 SE17 落地复核时一并核，不得预判覆盖。
+- 核验状态：未覆盖
+- 影响面：受影响系统/产品类型：WordPress AI 聊天／MCP 插件（AI Puffer 类）的 AI 自动回复内容存储与页面渲染面｜受影响人群：站点访客与管理员（存储脚本在访问被注入页面时于其浏览器执行）、站点运营者｜国内相关性：同型推断——国内 WordPress 站点与 AI 评论／客服插件存在同型面；未见国内同型公开披露。
+- 核验证据落点：主链现头 4a0db58440fb31c6ad5ee7425fcac7cb5785cef8（cursor/production-did-labels-e95a）下经 fetch.py 实取 20 插件全文检索（字节存 hidden_files/security-exam-2026-11-19/tree/plugins/，清单 hidden_files/security-exam-2026-11-19/plugins_list.txt）：上述关键词计数如上，20 条 RULE_ID 清单无渲染／XSS 主题。缺口与 EXAM-20261114-10 同一缺口、已在 loop backlog 在队区 SE17，本条不重复入队，仅在 SE17 条下补记本事件与「模型生成内容来源」子型分歧。
