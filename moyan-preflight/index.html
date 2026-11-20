@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moyan Preflight — Hybrid AI Security Auditor for AI Agents</title>
+<meta name="description" content="Pre-launch security audit for AI agents. On-device Gemini Nano first, Firebase AI Logic cloud fallback — the sensitive spec stays in your browser whenever it can.">
+<link rel="stylesheet" href="styles.css">
+<script type="importmap">
+{
+  "imports": {
+    "firebase/app": "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js",
+    "firebase/ai": "https://www.gstatic.com/firebasejs/12.6.0/firebase-ai.js",
+    "firebase/app-check": "https://www.gstatic.com/firebasejs/12.6.0/firebase-app-check.js"
+  }
+}
+</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="brand">
+    <div class="brand-mark">M</div>
+    <div>
+      <h1>Moyan Preflight</h1>
+      <p class="tagline">Hybrid AI security audit for AI agents — before you ship them.</p>
+    </div>
+  </div>
+  <div class="engine-status" id="engineStatus" aria-live="polite">
+    <span class="chip" id="nanoChip">On-device (Gemini Nano): checking…</span>
+    <span class="chip" id="cloudChip">Cloud (Firebase AI Logic): checking…</span>
+  </div>
+</header>
+
+<main>
+  <section class="panel input-panel">
+    <h2>1 · Paste your agent specification</h2>
+    <p class="hint">System prompt, tool list and behaviour notes — the document you would hand to a reviewer before launch. Or start from a sample:</p>
+    <div class="samples" id="sampleButtons"></div>
+    <textarea id="specInput" rows="14" spellcheck="false" placeholder="Paste your agent's system prompt, tools and behaviour rules here…"></textarea>
+    <div class="actions">
+      <button id="runButton" class="primary">Run preflight audit</button>
+      <span class="privacy-note">On the on-device path your spec never leaves this browser.</span>
+    </div>
+  </section>
+
+  <section class="panel result-panel" id="resultPanel" hidden>
+    <h2>2 · Audit result</h2>
+    <div class="verdict-row">
+      <div class="verdict-card" id="verdictCard">
+        <div class="verdict-label" id="verdictLabel">—</div>
+        <div class="verdict-meta" id="verdictMeta">—</div>
+      </div>
+      <div class="path-card">
+        <div class="path-label">Narrative produced by</div>
+        <div class="path-value" id="pathValue">—</div>
+        <div class="path-note" id="pathNote"></div>
+      </div>
+    </div>
+
+    <h3>Deterministic findings (run locally, no model)</h3>
+    <div id="findings"></div>
+
+    <h3>Auditor narrative</h3>
+    <div class="narrative" id="narrative"></div>
+  </section>
+
+  <section class="panel how-panel">
+    <h2>How the hybrid engine works</h2>
+    <ol class="steps">
+      <li><strong>Deterministic pre-check (always local).</strong> A rule layer scans the spec for launch-blocking patterns — embedded credentials, unrestricted shell access, irreversible actions without approval gates, prompt-injection trust, cross-user memory, missing audit logs.</li>
+      <li><strong>On-device first.</strong> If Chrome's built-in Gemini Nano is available, the audit narrative is generated on your machine. Specs containing roadmaps, keys policy or unreleased product details never leave the browser.</li>
+      <li><strong>Cloud fallback, attested.</strong> When on-device AI is unavailable, the narrative falls back to a cloud Gemini model through Firebase AI Logic, protected by App Check attestation — and the UI tells you which path answered. No silent degradation.</li>
+    </ol>
+    <p class="hint">Built for the #BuildHybridAI 2026 hackathon (Firebase AI Logic). By Sixu AI · Moyan Audit.</p>
+  </section>
+</main>
+
+<footer>
+  <p>Moyan Preflight is a pre-launch screening tool, not a certification. High-stakes agents still need a full human-led audit.</p>
+</footer>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

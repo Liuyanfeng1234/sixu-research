@@ -1,0 +1,80 @@
+:root {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --border: #2d333b;
+  --text: #e6edf3;
+  --muted: #9aa7b4;
+  --accent: #4f9cf9;
+  --bad: #f85149;
+  --warn: #d29922;
+  --ok: #3fb950;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.55 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+.site-header {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+  padding: 20px 28px; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+}
+.brand { display: flex; gap: 14px; align-items: center; }
+.brand-mark {
+  width: 46px; height: 46px; border-radius: 12px; background: var(--accent);
+  color: #fff; font-weight: 700; font-size: 24px; display: grid; place-items: center;
+}
+h1 { margin: 0; font-size: 22px; }
+.tagline { margin: 2px 0 0; color: var(--muted); }
+.engine-status { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px;
+  font-size: 12.5px; color: var(--muted); background: var(--panel);
+}
+.chip.on { color: var(--ok); border-color: var(--ok); }
+.chip.off { color: var(--muted); }
+main { max-width: 1080px; margin: 0 auto; padding: 24px 20px 40px; display: grid; gap: 20px; }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; }
+.panel h2 { margin: 0 0 8px; font-size: 17px; }
+.panel h3 { margin: 18px 0 8px; font-size: 15px; }
+.hint { color: var(--muted); margin: 4px 0 12px; }
+.samples { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.samples button {
+  background: transparent; color: var(--accent); border: 1px solid var(--accent);
+  border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px;
+}
+.samples button:hover { background: rgba(79,156,249,.12); }
+textarea {
+  width: 100%; background: #0d1117; color: var(--text); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  resize: vertical;
+}
+.actions { display: flex; align-items: center; gap: 14px; margin-top: 14px; flex-wrap: wrap; }
+button.primary {
+  background: var(--accent); color: #fff; border: 0; border-radius: 9px;
+  padding: 10px 20px; font-size: 15px; font-weight: 600; cursor: pointer;
+}
+button.primary:disabled { opacity: .55; cursor: wait; }
+.privacy-note { color: var(--muted); font-size: 13px; }
+.verdict-row { display: flex; gap: 14px; flex-wrap: wrap; }
+.verdict-card, .path-card {
+  border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; min-width: 230px; flex: 1;
+}
+.verdict-label { font-size: 22px; font-weight: 700; }
+.verdict-card.bad .verdict-label { color: var(--bad); }
+.verdict-card.warn .verdict-label { color: var(--warn); }
+.verdict-card.ok .verdict-label { color: var(--ok); }
+.verdict-meta, .path-note { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.path-label { color: var(--muted); font-size: 12.5px; text-transform: uppercase; letter-spacing: .04em; }
+.path-value { font-size: 17px; font-weight: 600; margin-top: 2px; }
+.finding { border: 1px solid var(--border); border-left-width: 5px; border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; }
+.finding.critical, .finding.high { border-left-color: var(--bad); }
+.finding.medium { border-left-color: var(--warn); }
+.finding.low { border-left-color: var(--muted); }
+.finding .sev { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.finding .title { font-weight: 600; }
+.finding .rec { color: var(--muted); margin-top: 4px; }
+.finding .ev { font: 12px ui-monospace, Menlo, monospace; color: var(--muted); margin-top: 4px; word-break: break-all; }
+.clean { color: var(--ok); }
+.narrative { white-space: pre-wrap; background: #0d1117; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.steps li { margin-bottom: 8px; }
+footer { max-width: 1080px; margin: 0 auto; padding: 0 20px 30px; color: var(--muted); font-size: 13px; }
