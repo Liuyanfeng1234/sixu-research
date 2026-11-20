@@ -85,14 +85,20 @@ The deterministic layer is heuristic (including a negation guard for specs
 that explicitly forbid a pattern). Preflight is a screening tool, not a
 certification; high-stakes agents still need a full human-led audit.
 
-Cloud-path status for the bundled `moyan-preflight` project (checked
-2026-11-20): the Firebase project, AI Logic backend and App Check
-enforcement are wired, but **no cloud model has yet produced a confirmed
-clean generation for this project** — the console-recommended model did
-not respond in template tests, and the older flash models are closed to
-new users on this account. That is exactly why the model choice is a
-runtime-configurable candidate list and why the local verdict never
-depends on the cloud path. The UI states the cloud model's availability
-as unconfirmed until a live call proves otherwise.
+Cloud-path status for the bundled `moyan-preflight` project (verified
+live on the deployed site, 2026-11-20): after the App Check debug token
+was aligned with the console registration, the earlier 401 errors
+cleared and the cloud path was exercised end-to-end. The default cloud
+model, `gemini-3.5-flash-lite` (Firebase AI Logic, App Check attested),
+completed three consecutive live runs: the ShopBot sample returned
+DO NOT SHIP (risk score 100/100, CRITICAL, 8 findings) with a
+cloud-generated narrative; the SupportPilot sample returned FIX BEFORE
+LAUNCH (30/100, HIGH, 2 findings) with a cloud-generated narrative; and
+a ShopBot re-run reproduced the same result. Both samples were then
+re-verified at the default address (no URL override) and again took the
+cloud path. The on-device Gemini Nano path is implemented, but Nano was
+unavailable in the test browser, so that path remains unverified. The
+model choice stays a runtime-configurable candidate list, and the local
+verdict never depends on the cloud path.
 
 By Sixu AI · Moyan Audit. MIT licensed.
