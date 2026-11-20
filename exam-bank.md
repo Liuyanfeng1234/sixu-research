@@ -1,15 +1,15 @@
 # V19 安全考卷库（公开版）
 
 > 公开版说明：本文件为 V19 智能体安全审计项目「每日安全考卷」库的公开快照。
-> - 版本：2026-11-19 版（新增 EXAM-20261119-01 一条；勘误 ERR-20261117-01／ERR-20261117-02 沿用在册；正文与内部正本逐字节一致，差异仅本头部注记）
+> - 版本：2026-11-20 版（新增 EXAM-20261120-01 至 EXAM-20261120-05 五条；勘误 ERR-20261117-01／ERR-20261117-02 沿用在册；正文与内部正本逐字节一致，差异仅本头部注记）
 > - 勘误（2026-11-17）：EXAM-20261117-01 原判「预测命中」撤销、改判「事后覆盖」（GHSA-jq3q-62jc-fqq9 首次发布日为 2026-07-06，原记 2026-11-16 系全球库收录/CVE 发布日误作首发日）；详见正本该条勘误注记。
 > - 勘误二（2026-11-17，ERR-20261117-02）：EXAM-20261114-01 原判「预测命中」撤销、改判「事后覆盖」（GHSA-pj75-r769-qjv2 首次发布日为 2026-07-05，原记 2026-11-13 系 CVE 记录发布日误作首发日，与勘误一同型）；全库预测命中归零，详见正本该条勘误注记。
-> - 统计时点：2026-11-19 17:37 CST
-> - 条目数：27 条（EXAM-20261111-01 至 EXAM-20261119-01）
-> - 核验状态分布（按条目「核验状态」字段计）：预测命中 0／事后覆盖 15／未覆盖 12
+> - 统计时点：2026-11-20 17:24 CST
+> - 条目数：32 条（EXAM-20261111-01 至 EXAM-20261120-05）
+> - 核验状态分布（按条目「核验状态」字段计）：预测命中 0／事后覆盖 15／未覆盖 15／未核 2
 > - 成熟度标注：数据集（持续更新中）。覆盖核验为规则覆盖级静态核验，非端到端实跑；统计深度有限，不构成统计结论。
 > - 许可：CC-BY-4.0（署名 Sixu AI / V19 智能组织）
-> - 源文件 sha256（内部正本）：ab003afd5da7a543fc2b7092267f1cd5b6c6aa51e9ce3ba950730c28057165ae
+> - 源文件 sha256（内部正本）：84e5173c08f08c213877aaddd8239063b93f14c91448374878989d69807546e3
 
 ---
 
@@ -279,3 +279,48 @@
 - 核验状态：未覆盖
 - 影响面：受影响系统/产品类型：WordPress AI 聊天／MCP 插件（AI Puffer 类）的 AI 自动回复内容存储与页面渲染面｜受影响人群：站点访客与管理员（存储脚本在访问被注入页面时于其浏览器执行）、站点运营者｜国内相关性：同型推断——国内 WordPress 站点与 AI 评论／客服插件存在同型面；未见国内同型公开披露。
 - 核验证据落点：主链现头 4a0db58440fb31c6ad5ee7425fcac7cb5785cef8（cursor/production-did-labels-e95a）下经 fetch.py 实取 20 插件全文检索（字节存 hidden_files/security-exam-2026-11-19/tree/plugins/，清单 hidden_files/security-exam-2026-11-19/plugins_list.txt）：上述关键词计数如上，20 条 RULE_ID 清单无渲染／XSS 主题。缺口与 EXAM-20261114-10 同一缺口、已在 loop backlog 在队区 SE17，本条不重复入队，仅在 SE17 条下补记本事件与「模型生成内容来源」子型分歧。
+
+## EXAM-20261120-01
+
+- 事件与类别：CVE-2026-133195 JetBrains Junie CLI 智能体文件工具可改项目目录外文件（CWE-73）｜其他（路径限制失效）｜公开日 2026-11-19（JetBrains 以 CNA 发布 CVE 记录；<26.6.29 受影响、26.6.29 修复、CVSS 3.1 7.5）｜来源 https://theinjection.dev/items/jetbrains-junie-cli-file-tools-path-escape/
+- 考题：给定案例——编码智能体的文件工具未把写目标限制在当前项目目录内，项目外路径的文件可被修改——V19 应检出「工具写出路径未限制在预期目录内」并判 fail，finding 须引用被检写出路径证据；写出路径经规范化后钉在项目目录内、越界写出被拒的构造应不误报，写出路径证据缺失应判 inconclusive 不冒充 fail。
+- 标准：应有一条在册检查对被审对象的「工具文件写出路径目录限制」做判定，即 EXAM-20261117-02 的 SE20 检查（v19.filesystem.unconfined_tool_write_path）。该检查至今未合入主链：现头 20 插件清单无 output_path_confinement.py（实取清单坐实），其 carrier-stage 三件仍待推（第二十八批候选）；相邻的 v19.filesystem.path_validation_without_pinning（SE6）判的是校验—使用钉住（TOCTOU）、按 EXAM-20261117-02 同一口径不计本面覆盖；归档成员计划面与管线自护 path_escape 亦不计覆盖。
+- 核验状态：未覆盖
+- 影响面：受影响系统/产品类型：AI 编码智能体 CLI（JetBrains Junie CLI 类）的文件工具写出面｜受影响人群：使用该 CLI 的开发者（项目外文件可被智能体改写，波及本机配置与凭据类文件）、其所在组织代码资产｜国内相关性：同型推断——国内开发者使用 JetBrains 系工具与同类编码智能体广泛，同型面存在；未见国内同型公开披露。
+- 核验证据落点：主链现头 4fcf68b47c7892cb3e5eded732b33046ddca85e0（cursor/production-did-labels-e95a）下经 fetch.py 实取 20 插件全文检索（字节存 hidden_files/security-exam-2026-11-20/tree/plugins/，清单 hidden_files/security-exam-2026-11-20/plugins_list.txt）：清单无 output_path_confinement.py，20 条 RULE_ID 无写出路径限制主题。缺口与 EXAM-20261117-02 同一缺口、已在 loop backlog 在队区 SE20，本条不重复入队，仅在 SE20 条下补记本事件。
+
+## EXAM-20261120-02
+
+- 事件与类别：CVE-2026-133196 JetBrains Junie CLI 经 shell 输出重定向覆写项目外文件｜其他（路径限制失效／shell 输出重定向）｜公开日 2026-11-19（JetBrains CNA 批次 CVE 记录发布；before 26.11.1 受影响）｜来源 https://noroxi.com/en/cve/CVE-2026-123315
+- 考题：给定案例——编码智能体经 shell 输出重定向把内容写到项目目录之外、覆写项目外文件，写出通道不是文件工具直写而是 shell 重定向——V19 应检出「写出路径未限制在预期目录内（重定向通道）」并判 fail，finding 须引用被检写出路径证据；重定向目标经规范化后钉在项目目录内或越界重定向被拒的构造应不误报。
+- 标准：同 EXAM-20261120-01——应由 SE20 检查（v19.filesystem.unconfined_tool_write_path）判定，该检查未合入主链（现头清单无 output_path_confinement.py）。本件另带子型分歧：SE20 冻结口径的 observed 越界独立 fail 支以「工具写出路径」为面，shell 输出重定向通道能否装下，须在 SE20 落地复核时一并核，不得预判覆盖。
+- 核验状态：未覆盖
+- 影响面：受影响系统/产品类型：AI 编码智能体 CLI（JetBrains Junie CLI 类）的 shell 执行与输出重定向写出面｜受影响人群：使用该 CLI 的开发者（项目外文件可经重定向被覆写）、其本机与组织资产｜国内相关性：同型推断——同 EXAM-20261120-01；未见国内同型公开披露。
+- 核验证据落点：同 EXAM-20261120-01 的现头实取面（hidden_files/security-exam-2026-11-20/tree/plugins/ 清单无 output_path_confinement.py）。缺口与 EXAM-20261117-02 同一缺口、已在 loop backlog 在队区 SE20，本条不重复入队，仅在 SE20 条下补记本事件与「shell 重定向写出」子型分歧。
+
+## EXAM-20261120-03
+
+- 事件与类别：CVE-2026-133197 JetBrains Junie CLI 代码审查中经文件名命令注入｜其他（命令注入）｜公开日 2026-11-19（JetBrains CNA 批次 CVE 记录发布；before 26.9.22 受影响）｜来源 https://noroxi.com/en/cve/CVE-2026-123315
+- 考题：给定案例——编码智能体的代码审查功能把文件名带入命令构造，构造得当的文件名可致命令注入——V19 应检出「不可信输入插值进命令构造且特殊元素未中和」并判 fail，finding 须引用被检命令构造证据；输入以参数列表／参数化方式传递、永不成为命令语法的构造应不误报。
+- 标准：类别上应由在册检查 v19.command_injection.unneutralized_construction（plugins/command_injection.py，VERSION 0.1.0）判定：已检视摘要中 shell_string＋untrusted 输入＋neutralization none 判 fail，字段集（execution_mode/input_source/neutralization_method/line_separator_handling）为命令构造面。但本件公开记录只有 CNA 一行描述，未披露被审构造的执行模式（shell 串／参数列表）与中和方式，字段对表未齐——按 EXAM-20261117-01 的教训（构造与日期证据不齐不得判命中），本条暂记「未核」：不判预测命中、不入战绩表；待 JetBrains 固定问题页细节或构造证据可核后另核改判。
+- 核验状态：未核
+- 影响面：受影响系统/产品类型：AI 编码智能体 CLI（JetBrains Junie CLI 类）的代码审查命令构造面｜受影响人群：使用该 CLI 审查含构造文件名的仓库的开发者（文件名可致本机命令执行）｜国内相关性：同型推断——同类编码智能体代码审查面存在同型风险；未见国内同型公开披露。
+- 核验证据落点：主链现头 4fcf68b4 经 fetch.py 实取 plugins/command_injection.py 在册（7,999 B、sha256 00375e26…，与 SE2 钉版全等，字节存 hidden_files/security-exam-2026-11-20/tree/plugins/）；检查引入时点＝PR #312 合入（合并提交 7576007e、2026-11-12T10:20:43Z，见本库 EXAM-20261111-02 复核注记），早于事件公开日 2026-11-19——时序面成立，但构造细节证据缺失、命中四要件（检查落点＋引入时点＋事件来源＋字段对表）缺其一，故未核。诚实口径不变：此为规则覆盖级静态核验，非实跑。
+
+## EXAM-20261120-04
+
+- 事件与类别：CVE-2026-133198 JetBrains Junie 项目文件终端环境设置致代码执行｜其他（项目文件配置驱动代码执行）｜公开日 2026-11-19（JetBrains CNA 批次 CVE 记录发布；Junie before 252.819.35, 253.819.35 受影响、CVSS 7.8）｜来源 https://sec.kaitan.id/news/18223895
+- 考题：给定案例——智能体读取项目文件中的终端环境设置并据此执行，攻击者把设置植入项目文件即可在开发者打开项目时达成代码执行——V19 应检出「项目文件供给的终端／执行配置未经可信确认即生效」并判 fail，finding 须引用被检配置证据；项目文件设置被拒、或须经用户确认才生效的构造应不误报，配置证据缺失应判 inconclusive 不冒充 fail。
+- 标准：应有一条在册检查对被审对象的「项目文件执行配置可信边界」做判定。现头 20 插件无此检查：全文检索 terminal/environment 在实取面无配置可信主题命中（terminal 仅无关词面）；相邻的 v19.command_injection.unneutralized_construction 只判命令构造摘要的中和面、v19.channel.unverified_command_sender 只判命令通道发送方身份，均装不下项目文件配置面，不计覆盖。
+- 核验状态：未覆盖
+- 影响面：受影响系统/产品类型：AI 编码智能体 IDE 集成（JetBrains Junie 类）的项目文件终端配置加载面｜受影响人群：打开不可信项目的开发者（项目文件设置可致本机代码执行）、其组织代码与凭据资产｜国内相关性：同型推断——国内 AI IDE／编码智能体普遍加载项目级配置，同型面存在；未见国内同型公开披露。
+- 核验证据落点：主链现头 4fcf68b4 经 fetch.py 实取 20 插件全文检索（hidden_files/security-exam-2026-11-20/tree/plugins/）：20 条 RULE_ID 清单无项目文件配置主题。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-20」，SE23）。
+
+## EXAM-20261120-05
+
+- 事件与类别：CVE-2026-63129 mssql-mcp-core 写工具 SQL 注入（GHSA-2m9m-6cr5-9x25）｜其他（SQL 注入）｜公开日 2026-11-19（暂锚：全球库 GHSA 2026-11-19T00:46:38Z 收录、VibeVulns 同批列新并记 2026-11-18 美东日期；仓库级首发日实读受 GitHub API 限流未完成——按本库写死口径全球库日期不得作公开日，此锚仅为暂记、状态随之记未核；受影响 core/server <0.6.0、0.6.0 修复、CVSS 3.1 8.8）｜来源 https://www.vibevulns.com/?severity=critical
+- 考题：给定案例——MCP 数据库工具把表名、列名、索引与模式标识符及自由格式 whereClause 未参数化插值拼入 T-SQL 批次、仅参数化数据值，恶意 MCP 客户端或被间接提示注入引导的智能体可在确认步（confirmUpdate/confirmDelete）触发之前运行堆叠 DDL/DML——V19 应检出「不可信输入插值进 SQL 构造且特殊元素未中和」并判 fail，finding 须引用被检 SQL 构造证据；标识符经 allowlist／引用中和、值走绑定参数传递的构造应不误报。
+- 标准：类别与字段对表上应由在册检查 v19.sql_injection.unneutralized_parameter_interpolation（plugins/sql_construction_neutralization.py，VERSION 0.1.0）判定：interpolated_string＋untrusted＋neutralization none／delimiter unhandled 判 fail，本件的 whereClause 自由格式插值与标识符插值在构造模式面与该判定同型（标识符不可绑定参数、须以中和／allowlist 处置，此点为 SE9 字段口径的待核子项）。检查引入时点（PR #352 合入、2026-11-15T00:17:33Z）早于全球库收录日，但事件首次公开日（仓库级）未实读完成——按 ERR-20261117-01／02 写死规则不得据全球库日期判「预测命中」，本条记「未核」，不入战绩表；待 GitHub API 限流解除后实读仓库级 GHSA published_at 再改判（命中／事后覆盖二选一）。
+- 核验状态：未核
+- 影响面：受影响系统/产品类型：MCP 数据库服务器（Microsoft SQL Server 类 mssql-mcp reader/writer/server）的写工具 SQL 构造面及其连接的业务数据库｜受影响人群：数据库运营者与数据主体（堆叠 SQL 可读写／销毁数据，特权登录＋xp_cmdshell 时可达操作系统命令）｜国内相关性：同型推断——国内 MCP 数据库连接器类产品存在同型面；未见国内同型公开披露。
+- 核验证据落点：主链现头 4fcf68b4 经 fetch.py 实取 plugins/sql_construction_neutralization.py 在册（9,983 B、sha256 261e69d9…，与 SE9 钉版全等，字节存 hidden_files/security-exam-2026-11-20/tree/plugins/）；事件细节来源 VibeVulns 条目（插值面清单与确认步绕过逐项）；未核原因＝仓库级首发日实读被 GitHub API 限流（403）阻断、全球库 published_at 2026-11-19T00:46:38Z 已实读但按口径不作锚。诚实口径不变：此为规则覆盖级静态核验，非实跑。
