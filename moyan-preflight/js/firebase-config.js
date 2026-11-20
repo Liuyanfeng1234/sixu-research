@@ -22,10 +22,14 @@ export const firebaseConfig = {
 // project (console, 2026-11-20). For the submission build the debug token
 // flow is accepted: with APPCHECK_DEBUG = true the SDK uses the debug token
 // registered in Firebase Console -> App Check -> Apps -> Manage debug tokens.
-// The registered token value is recorded in the production status file only —
-// never commit it here (this file ships in the public repo).
+// APPCHECK_DEBUG_TOKEN below pins the token registered under the name
+// "moyan-preflight-debug", so every browser presents the registered token
+// instead of generating a fresh unregistered one (per-browser generation
+// caused App Check 401s on 2026-11-20). The same value is also recorded
+// in the production status file.
 // For a production build, replace with a reCAPTCHA Enterprise site key.
 export const APPCHECK_DEBUG = true;
+export const APPCHECK_DEBUG_TOKEN = "19706F62-DE62-456C-B997-4FC8A482E79D";
 export const APPCHECK_SITE_KEY = "REPLACE_ME_RECAPTCHA_ENTERPRISE_SITE_KEY";
 
 // Cloud model used through Firebase AI Logic when the on-device path is

@@ -21,6 +21,7 @@ import {
   FIREBASE_CONFIGURED,
   firebaseConfig,
   APPCHECK_DEBUG,
+  APPCHECK_DEBUG_TOKEN,
   APPCHECK_SITE_KEY,
   CLOUD_MODEL_CANDIDATES,
   CLOUD_TIMEOUT_MS,
@@ -164,10 +165,10 @@ async function getCloudAi() {
 
       const app = initializeApp(firebaseConfig);
       if (APPCHECK_DEBUG) {
-        // Debug-token flow (accepted for the hackathon submission): the SDK
-        // prints a debug token to the console; register it in the Firebase
-        // Console under App Check -> Manage debug tokens.
-        self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+        // Debug-token flow (accepted for the hackathon submission): present
+        // the pinned token registered in the Firebase Console under App
+        // Check -> Manage debug tokens (see firebase-config.js).
+        self.FIREBASE_APPCHECK_DEBUG_TOKEN = APPCHECK_DEBUG_TOKEN;
         initializeAppCheck(app, { provider: new ReCaptchaEnterpriseProvider("debug"), isTokenAutoRefreshEnabled: true });
       } else {
         initializeAppCheck(app, {
