@@ -34,23 +34,30 @@ export const APPCHECK_SITE_KEY = "REPLACE_ME_RECAPTCHA_ENTERPRISE_SITE_KEY";
 
 // Cloud model used through Firebase AI Logic when the on-device path is
 // unavailable or returns an error.
-// 2026-11-20 console check: gemini-2.5-flash and gemini-2.0-flash both return
-// "no longer available to new users"; the console recommends gemini-3.8-flash.
-// That model did not respond in two console template tests, so its
-// availability is UNCONFIRMED — verify with a real call before submission.
-export const CLOUD_MODEL = "gemini-3.8-flash";
+// 2026-11-20 live verification (deployed site, ?cloudModels= override):
+// gemini-3.5-flash-lite answered through the cloud path (Firebase AI Logic,
+// App Check attested) on all three runs — ShopBot and SupportPilot samples
+// plus a ShopBot repeat, each producing a generated cloud narrative. It is
+// therefore the default below. The gemini-2.5 / gemini-2.0 series (flash
+// and flash-lite) return 404 "no longer available to new users" on this
+// account, and gemini-3.8-flash did not respond within the 30 s attempt
+// timeout (nor in earlier console template tests).
+export const CLOUD_MODEL = "gemini-3.5-flash-lite";
 
 // Ordered cloud-model candidates: the engine tries each in turn and uses the
-// first that answers (see js/hybrid-engine.js). Availability of EVERY entry
-// is UNCONFIRMED for this project as of 2026-11-20 — the console recommended
-// gemini-3.8-flash but it did not respond in two template tests, and
-// gemini-2.5-flash is closed to new users on this account (it stays in the
-// list because it remains enabled on many other accounts — e.g. if you fork
-// this repo against your own Firebase project). If every candidate fails,
-// the deterministic local verdict stands on its own; the UI says so.
+// first that answers (see js/hybrid-engine.js). As of the 2026-11-20 live
+// verification, gemini-3.5-flash-lite is the only candidate CONFIRMED to
+// answer on this project (three successful cloud runs, see above), so it
+// leads the list. gemini-3.8-flash is kept as a fallback only: it never
+// responded within the 30 s attempt timeout in testing. The gemini-2.5 /
+// gemini-2.0 models are NOT listed: they return 404 for new users on this
+// account (if you fork this repo against your own Firebase project where
+// they are enabled, add them back or use the override below). If every
+// candidate fails, the deterministic local verdict stands on its own; the
+// UI says so.
 // Override without editing code: open the app with ?cloudModels=a,b (or
 // ?cloudModel=a), or set localStorage "moyan-preflight.cloudModels".
-export const CLOUD_MODEL_CANDIDATES = ["gemini-3.8-flash", "gemini-2.5-flash"];
+export const CLOUD_MODEL_CANDIDATES = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
 
 // Per-attempt cloud timeout (ms). The observed 2026-11-20 failure mode was a
 // long non-response rather than a fast error — without a timeout the demo
