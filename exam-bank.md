@@ -1,16 +1,16 @@
 # V19 安全考卷库（公开版）
 
 > 公开版说明：本文件为 V19 智能体安全审计项目「每日安全考卷」库的公开快照。
-> - 版本：2026-11-21 版（新增 EXAM-20261121-01 至 EXAM-20261121-03 三条、均判「未覆盖」；EXAM-20261120-05 经增刊补核改判「未核→事后覆盖」、公开日锚订正为 2026-07-08；EXAM-20261120-02／-03 来源链接错位勘误（同一错位链接）、EXAM-20261120-03 补核维持「未核」；勘误 ERR-20261117-01／ERR-20261117-02 沿用在册；正文与内部正本逐字节一致，差异仅本头部注记）
+> - 版本：2026-11-23 版（新增 EXAM-20261122-01（未核）、EXAM-20261123-01（未覆盖）两条；EXAM-20261120-05 经增刊补核改判「未核→事后覆盖」、公开日锚订正为 2026-07-08；EXAM-20261120-02／-03 来源链接错位勘误（同一错位链接）、EXAM-20261120-03 补核维持「未核」；勘误 ERR-20261117-01／ERR-20261117-02 沿用在册；正文与内部正本逐字节一致，差异仅本头部注记）
 > - 勘误（2026-11-17）：EXAM-20261117-01 原判「预测命中」撤销、改判「事后覆盖」（GHSA-jq3q-62jc-fqq9 首次发布日为 2026-07-06，原记 2026-11-16 系全球库收录/CVE 发布日误作首发日）；详见正本该条勘误注记。
 > - 勘误二（2026-11-17，ERR-20261117-02）：EXAM-20261114-01 原判「预测命中」撤销、改判「事后覆盖」（GHSA-pj75-r769-qjv2 首次发布日为 2026-07-05，原记 2026-11-13 系 CVE 记录发布日误作首发日，与勘误一同型）；全库预测命中归零，详见正本该条勘误注记。
 > - 勘误三（2026-11-20，ERR-20261120-01）：EXAM-20261120-02 所列 noroxi 来源链接错位（指向 CVE-2026-123315、公开日 2026-11-06，与本条事件 CVE-2026-133196 不符），原链接留痕保留、-02 事实依据以 JetBrains CNA 批次 CVE 记录为准；EXAM-20261120-03 所列为同一错位链接、同日补同型勘误注记（原链接留痕保留、事实依据以 CVE 记录全文实读为准、状态「未核」不受影响）；同日增刊补核：EXAM-20261120-05 改判「事后覆盖」（仓库级首发 2026-07-08、SE9 检查引入晚于公开日）、EXAM-20261120-03 维持「未核」；详见正本各条注记。
-> - 统计时点：2026-11-21 10:29 CST
-> - 条目数：35 条（EXAM-20261111-01 至 EXAM-20261121-03）
-> - 核验状态分布（按条目「核验状态」字段计）：预测命中 0／事后覆盖 16／未覆盖 18／未核 1
+> - 统计时点：2026-11-23 13:28 CST
+> - 条目数：37 条（EXAM-20261111-01 至 EXAM-20261123-01）
+> - 核验状态分布（按条目「核验状态」字段计）：预测命中 0／事后覆盖 16／未覆盖 19／未核 2
 > - 成熟度标注：数据集（持续更新中）。覆盖核验为规则覆盖级静态核验，非端到端实跑；统计深度有限，不构成统计结论。
 > - 许可：CC-BY-4.0（署名 Sixu AI / V19 智能组织）
-> - 源文件 sha256（内部正本）：8b59941962d14b2ab505cf17a618e91e1711385ac20cd2687e1f6a41a2b00455
+> - 源文件 sha256（内部正本）：f119b802a62b5a9feec0aec3b381a1e6404c5a5a76778093bc4a054684812e6f
 
 ---
 
@@ -19,7 +19,7 @@
 记账规则：每条含事件与类别｜考题（可核的期望）｜标准（期望的检出方式）｜核验状态｜核验证据落点。核验状态只用四档原词：未核／预测命中／事后覆盖／未覆盖。
 诚实口径（写死）：覆盖核验是规则覆盖级静态核验，不是实跑；V19 尚未端到端实跑，任何条目不得表述为「实跑通过」。「预测命中」须检查引入时点（PR 号/合并日期）早于事件公开日且证据齐备，才写入战绩表「预测中了什么」栏。
 成文教训（2026-11-17 立，ERR-20261117-01／ERR-20261117-02 两度同型勘误后写死）：「公开日」一律以一手源首次发布日为准——事件在仓库级公告（如仓库 GHSA）早于全球库收录（GitHub 全球公告库／CVE 记录）公开的，以仓库级首次发布日为准；全球库收录日与 CVE 记录发布日不得作公开日。判「预测命中」前必须实读一手源首次发布时点，不得只锚全球库/CVE 日期。勘误编号体系 ERR-YYYYMMDD-NN 与《公开面维护规范》（agent-ops/public-channel-maintenance-2026-11-17.md）对齐。
-库内累计（2026-11-21 正刊后）：35 条——预测命中 0／事后覆盖 16／未覆盖 18／未核 1。
+库内累计（2026-11-23 正刊后）：37 条——预测命中 0／事后覆盖 16／未覆盖 19／未核 2。
 
 ---
 
@@ -357,3 +357,21 @@
 - 核验状态：未覆盖
 - 影响面：llama.cpp 及其 GGUF 生态（本地推理部署面广）；模型文件即不可信输入的又一实证，与 EXAM-20261116-02（vLLM 竞态）同属推理引擎本体缺陷面。
 - 核验证据落点：主链现头 89a655254f247a95dbf24fb4213c0e33076b018a，插件目录清单实读（hidden_files/security-exam-2026-11-21/plugins_list.txt）；loop backlog SE25；CVE 记录与 VulnCheck 公告原文。
+
+## EXAM-20261122-01
+
+- 事件与类别：CVE-2026-134540——llama.cpp llama-server 采样初始化输入验证缺陷（sampling.cpp common_sampler_init）。类别：其他（输入验证／采样面）。公开日：2026-11-21（CVE 记录 2026-11-21 发布，AI Model Vulnerability Tracker 以 GitHub Advisory Database／CVE 记录为源同日收录；无仓库级 GHSA 可锚——llama.cpp 仓库公告面未见此件，故以 CVE 记录为首次公开）。影响：公开记录仅述 llama-server 的 common_sampler_init 采样初始化路径存在输入验证问题（CVSS 3.1 5.3，Moderate），未披露触发参数、受影响版本范围与具体效果（崩溃／拒绝服务与否未明）。来源：https://axis-intelligence.com/research/ai-model-vulnerability-tracker/（条目链 NVD CVE-2026-134540；本轮 NVD 页直取超时未成，tracker 条目与多源检索一致性已核）
+- 考题：对推理服务采样初始化面的参数验证摘要，V19 应判定：①调用方供给的采样参数未经验证即进入采样器初始化且可致异常状态 ＝ fail；②采样参数经范围／合法性验证、非法值被拒 ＝ pass 不误报；③参数验证证据缺失 ＝ inconclusive。应引用被检采样参数验证证据。
+- 标准：类别上相邻两面均未坐实可装下本件——SE25 检查（v19.model.loader_metadata_bounds，拟合入未合入）判的是模型文件加载器元数据派生边界、非采样参数面；SE15 在册检查 v19.resource.caller_parameter_without_server_limit 判的是尺寸／计数类参数的服务端资源上限、非采样器初始化的合法性验证面。但本件公开记录只有组件／文件与「input validation」类级描述，未披露被审构造的触发参数与效果，字段对表未齐——按 EXAM-20261120-03 的教训（构造与日期证据不齐不得判命中、亦不得据类级描述虚立缺口），本条暂记「未核」：不判预测命中、不判未覆盖、不入战绩表、不入 backlog；待 CVE 记录全文／一手 write-up 给出触发参数与效果细节后另核改判。
+- 核验状态：未核
+- 影响面：llama.cpp／llama-server 本地与托管推理部署的采样参数面；与 EXAM-20261121-03（hrm_text 加载器溢出）同产品不同面（加载面 vs 采样面）。
+- 核验证据落点：主链现头 89a655254f247a95dbf24fb4213c0e33076b018a（本轮 list_commits 实读未前进），插件目录清单实读（hidden_files/security-exam-2026-11-22/plugins_list.txt，20 件与 2026-11-21 钉版全等）；20 插件 RULE_ID 清单无采样参数验证主题（全文检索沿用 hidden_files/security-exam-2026-11-20/tree/plugins/：sampler/sampling 零命中）。诚实口径不变：此为规则覆盖级静态核验，非实跑。
+
+## EXAM-20261123-01
+
+- 事件与类别：CVE-2026-134817——Flux159 mcp-server-kubernetes 标志形位置操作数参数注入（CWE-88 Improper Neutralization of Argument Delimiters in a Command）。类别：其他（参数注入）。公开日：2026-11-22（NVD Published Date 2026-11-22，VulnCheck CNA；无仓库级 GHSA 可锚，以 CVE 记录为首次公开）。影响：mcp-server-kubernetes <4.2.0 的 exec_in_pod／kubectl_patch／kubectl_logs 等工具把远程 MCP 客户端供给的值作位置操作数传给 kubectl，未拒绝以连字符开头的值，攻击者可注入 --filename 等 kubectl 标志使 kubectl 读取服务器主机文件、绕过文件读取限制（CVSS 4.0 高危，CNA 向量 VC:H；4.2.0 修复）。来源：https://www.vulncheck.com/advisories/mcp-server-kubernetes-before-4.2.0-argument-injection-via-flag-shaped-positional-operands 与 NVD https://nvd.nist.gov/vuln/detail/CVE-2026-134817
+- 考题：对工具命令构造的参数传递摘要，V19 应判定：①不可信输入作位置操作数传递、且以连字符开头的标志形值未被拒／未以 -- 终止符隔离 ＝ fail（本件本体）；②标志形操作数被拒、或操作数置于 -- 终止符之后 ＝ pass 不误报；③操作数处理证据缺失 ＝ inconclusive。应引用被检操作数处理证据。
+- 标准：应有一条在册检查对被审对象的「位置操作数标志注入防护（标志形值拒收／-- 终止符隔离）」做判定。现头 20 插件无此检查：全文检索 operand／end_of_options／dash 在实取面零命中；相邻的 v19.command_injection.unneutralized_construction（plugins/command_injection.py）文件头明示「Argument-list / parameterized execution, where each input stays a separate argument and never becomes command syntax, is not this pattern」，其判定序对 argv_list＋untrusted 一律判 pass（argv_separated_construction）——本件恰是 argv 分离下仍成立的标志形操作数注入，该检查按其自身口径不覆盖、且若以其字段装填本件会误判 pass，不计覆盖。
+- 核验状态：未覆盖
+- 影响面：受影响系统/产品类型：Kubernetes 管理类 MCP 服务器（mcp-server-kubernetes 类）的 kubectl 工具调用面｜受影响人群：经 SSE／Streamable HTTP 接入的运营者与集群（标志注入可使 kubectl 读服务器主机文件、绕过文件读取限制）｜国内相关性：同型推断——国内以 MCP 驱动 kubectl／CLI 工具的部署存在同型面（一切「位置操作数未隔离」构造）；未见国内同型公开披露。
+- 核验证据落点：主链现头 afde544787d274db45491dc4796510b8e4501f40（cursor/production-did-labels-e95a，本轮 list_commits 实读，顶提交 Merge PR #501、2026-11-22T14:14:05Z）下经连接器实读 plugins 目录清单（hidden_files/security-exam-2026-11-23/plugins_list.txt，20 件与 2026-11-21 钉版逐件 blob/size 全等、无新增检查合入）；全文检索沿用 hidden_files/security-exam-2026-11-20/tree/plugins/ 实取树：operand/end_of_options/dash 零命中，command_injection.py 文件头与 _decision 判定序自述如上。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-23」，SE26）。诚实口径不变：此为规则覆盖级静态核验，非实跑。
