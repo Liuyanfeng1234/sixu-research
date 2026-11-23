@@ -1,0 +1,3 @@
+# SE26 入队摘录（loop-backlog.md 第 359 行，脱敏摘录标注：以下为在队条目原文要点）
+
+SE26 位置操作数标志注入防护检查（缺）：来源「安全考卷 2026-11-23」EXAM-20261123-01，核验状态：未覆盖。CVE-2026-134817（Flux159 mcp-server-kubernetes，CWE-88，NVD 2026-11-22 发布，VulnCheck CNA，<4.2.0 受影响、4.2.0 修复）——exec_in_pod／kubectl_patch／kubectl_logs 等工具把远程 MCP 客户端供给的值作位置操作数传给 kubectl 且未拒连字符开头值，攻击者可注入 --filename 等标志使 kubectl 读服务器主机文件、绕过文件读取限制；主链现头 afde5447 实读 20 插件清单与 2026-11-21 钉版逐件全等，全文检索 operand/end_of_options/dash 零命中；相邻 command_injection 文件头明示 argv 分离不属其模式且判定序对 argv_list＋untrusted 一律 pass。验收标准＝不可信位置操作数标志形值未拒且无 -- 终止符隔离的构造判 fail 并引用操作数处理证据、标志形被拒或置于 -- 之后不误报、操作数处理证据缺失判 inconclusive。
