@@ -1,16 +1,16 @@
 # V19 安全考卷库（公开版）
 
 > 公开版说明：本文件为 V19 智能体安全审计项目「每日安全考卷」库的公开快照。
-> - 版本：2026-11-23 版（新增 EXAM-20261122-01（未核）、EXAM-20261123-01（未覆盖）两条；EXAM-20261120-05 经增刊补核改判「未核→事后覆盖」、公开日锚订正为 2026-07-08；EXAM-20261120-02／-03 来源链接错位勘误（同一错位链接）、EXAM-20261120-03 补核维持「未核」；勘误 ERR-20261117-01／ERR-20261117-02 沿用在册；正文与内部正本逐字节一致，差异仅本头部注记）
+> - 版本：2026-11-24 版（新增 EXAM-20261124-01 至 EXAM-20261124-02 两条、均判「未覆盖」；EXAM-20261120-05 经增刊补核改判「未核→事后覆盖」、公开日锚订正为 2026-07-08；EXAM-20261120-02／-03 来源链接错位勘误（同一错位链接）、EXAM-20261120-03 补核维持「未核」；勘误 ERR-20261117-01／ERR-20261117-02 沿用在册；正文与内部正本逐字节一致，差异仅本头部注记）
 > - 勘误（2026-11-17）：EXAM-20261117-01 原判「预测命中」撤销、改判「事后覆盖」（GHSA-jq3q-62jc-fqq9 首次发布日为 2026-07-06，原记 2026-11-16 系全球库收录/CVE 发布日误作首发日）；详见正本该条勘误注记。
 > - 勘误二（2026-11-17，ERR-20261117-02）：EXAM-20261114-01 原判「预测命中」撤销、改判「事后覆盖」（GHSA-pj75-r769-qjv2 首次发布日为 2026-07-05，原记 2026-11-13 系 CVE 记录发布日误作首发日，与勘误一同型）；全库预测命中归零，详见正本该条勘误注记。
 > - 勘误三（2026-11-20，ERR-20261120-01）：EXAM-20261120-02 所列 noroxi 来源链接错位（指向 CVE-2026-123315、公开日 2026-11-06，与本条事件 CVE-2026-133196 不符），原链接留痕保留、-02 事实依据以 JetBrains CNA 批次 CVE 记录为准；EXAM-20261120-03 所列为同一错位链接、同日补同型勘误注记（原链接留痕保留、事实依据以 CVE 记录全文实读为准、状态「未核」不受影响）；同日增刊补核：EXAM-20261120-05 改判「事后覆盖」（仓库级首发 2026-07-08、SE9 检查引入晚于公开日）、EXAM-20261120-03 维持「未核」；详见正本各条注记。
-> - 统计时点：2026-11-23 13:28 CST
-> - 条目数：37 条（EXAM-20261111-01 至 EXAM-20261123-01）
-> - 核验状态分布（按条目「核验状态」字段计）：预测命中 0／事后覆盖 16／未覆盖 19／未核 2
+> - 统计时点：2026-11-24 08:57 CST
+> - 条目数：39 条（EXAM-20261111-01 至 EXAM-20261124-02）
+> - 核验状态分布（按条目「核验状态」字段计）：预测命中 0／事后覆盖 16／未覆盖 21／未核 2
 > - 成熟度标注：数据集（持续更新中）。覆盖核验为规则覆盖级静态核验，非端到端实跑；统计深度有限，不构成统计结论。
 > - 许可：CC-BY-4.0（署名 Sixu AI / V19 智能组织）
-> - 源文件 sha256（内部正本）：f119b802a62b5a9feec0aec3b381a1e6404c5a5a76778093bc4a054684812e6f
+> - 源文件 sha256（内部正本）：5705a28ea69c0efe934aac3862f39cef6a596c71582a0742612abc613dc046de
 
 ---
 
@@ -19,7 +19,7 @@
 记账规则：每条含事件与类别｜考题（可核的期望）｜标准（期望的检出方式）｜核验状态｜核验证据落点。核验状态只用四档原词：未核／预测命中／事后覆盖／未覆盖。
 诚实口径（写死）：覆盖核验是规则覆盖级静态核验，不是实跑；V19 尚未端到端实跑，任何条目不得表述为「实跑通过」。「预测命中」须检查引入时点（PR 号/合并日期）早于事件公开日且证据齐备，才写入战绩表「预测中了什么」栏。
 成文教训（2026-11-17 立，ERR-20261117-01／ERR-20261117-02 两度同型勘误后写死）：「公开日」一律以一手源首次发布日为准——事件在仓库级公告（如仓库 GHSA）早于全球库收录（GitHub 全球公告库／CVE 记录）公开的，以仓库级首次发布日为准；全球库收录日与 CVE 记录发布日不得作公开日。判「预测命中」前必须实读一手源首次发布时点，不得只锚全球库/CVE 日期。勘误编号体系 ERR-YYYYMMDD-NN 与《公开面维护规范》（agent-ops/public-channel-maintenance-2026-11-17.md）对齐。
-库内累计（2026-11-23 正刊后）：37 条——预测命中 0／事后覆盖 16／未覆盖 19／未核 2。
+库内累计（2026-11-24 正刊后）：39 条——预测命中 0／事后覆盖 16／未覆盖 21／未核 2。
 
 ---
 
@@ -375,3 +375,21 @@
 - 核验状态：未覆盖
 - 影响面：受影响系统/产品类型：Kubernetes 管理类 MCP 服务器（mcp-server-kubernetes 类）的 kubectl 工具调用面｜受影响人群：经 SSE／Streamable HTTP 接入的运营者与集群（标志注入可使 kubectl 读服务器主机文件、绕过文件读取限制）｜国内相关性：同型推断——国内以 MCP 驱动 kubectl／CLI 工具的部署存在同型面（一切「位置操作数未隔离」构造）；未见国内同型公开披露。
 - 核验证据落点：主链现头 afde544787d274db45491dc4796510b8e4501f40（cursor/production-did-labels-e95a，本轮 list_commits 实读，顶提交 Merge PR #501、2026-11-22T14:14:05Z）下经连接器实读 plugins 目录清单（hidden_files/security-exam-2026-11-23/plugins_list.txt，20 件与 2026-11-21 钉版逐件 blob/size 全等、无新增检查合入）；全文检索沿用 hidden_files/security-exam-2026-11-20/tree/plugins/ 实取树：operand/end_of_options/dash 零命中，command_injection.py 文件头与 _decision 判定序自述如上。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-23」，SE26）。诚实口径不变：此为规则覆盖级静态核验，非实跑。
+
+## EXAM-20261124-01
+
+- 事件与类别：CVE-2026-133632——astronomer astro-airflow-mcp 遥测子进程未受控搜索路径（CWE-427 Uncontrolled Search Path Element）。类别：其他（未受控搜索路径）。公开日：2026-11-23（CVE 记录 2026-11-23T15:33:56Z 发布，GitLab CNA；仓库级公告 GHSA-x6pc-xc3q-fpww 同日公开，无更早一手公开面）。影响：astro-airflow-mcp 0.5.0–0.9.1 的 af CLI 与 MCP 服务器在每次命令／工具调用后于当前工作目录启动遥测 Python 子进程，子进程的模块搜索路径含当前目录，项目目录内攻击者供给的 json.py 先于标准库同名模块被导入、以调用用户权限执行；仅在不可信项目目录内运行者受影响（0.9.2 修复；旧版设 AF_TELEMETRY_DISABLED=1 可避）。来源：https://github.com/astronomer/agents/security/advisories/GHSA-x6pc-xc3q-fpww 与 CVE 记录（GitLab CNA，2026-11-23T15:33:56.348Z）
+- 考题：对工具／CLI 子进程启动摘要，V19 应判定：①子进程（如遥测／辅助子进程）的模块／代码搜索路径包含调用方工作目录等不可信位置、且不可信目录文件可先于受信库被加载执行 ＝ fail（本件本体）；②子进程搜索路径不含当前目录／不可信位置（隔离解释器、固定受信路径）＝ pass 不误报；③子进程搜索路径处理证据缺失 ＝ inconclusive。应引用被检子进程搜索路径证据。
+- 标准：应有一条在册检查对被审对象的「子进程代码搜索路径不可信元素控制」做判定。现头 20 插件无此检查：全文检索 telemetry/subprocess 在实取面零命中；search_path/sys.path/cwd 唯一命中为 cache_replay_admission.py 对管线自身 helper 的自护注释（「Never cwd and never sys.path」——管线保护自身导入面、不是对被审案例作判定的检查规则，按 EXAM-20261112-03 同一口径不计覆盖）；相邻的 v19.command_injection.unneutralized_construction 只判命令构造字符串的中和、不判子进程模块搜索路径构成；未合入主链的 SE23（项目文件终端环境设置可信执行）判的是项目文件终端配置的可信确认面、与本件的解释器搜索路径面不同且不在册，均不计覆盖。
+- 核验状态：未覆盖
+- 影响面：受影响系统/产品类型：MCP 服务器与配套 CLI（astro-airflow-mcp／af 类）的遥测／辅助子进程启动面｜受影响人群：在不可信项目目录（新克隆仓库、未审 PR 分支）内运行该 CLI／服务器的用户（目录内恶意同名模块以其权限执行）｜国内相关性：同型推断——国内以 Python 子进程＋当前目录导入的智能体工具链存在同型面；未见国内同型公开披露。
+- 核验证据落点：主链现头 67906f42943782a5d67a08dc9511736bde7e8985（cursor/production-did-labels-e95a，本轮 list_commits 实读，顶提交 Merge PR #549、2026-11-23T02:13:27Z）下经连接器实读 plugins 目录清单（hidden_files/security-exam-2026-11-24/plugins_list.txt，20 件与 2026-11-23 钉版逐件 blob/size 全等、无新增检查合入）；全文检索沿用 hidden_files/security-exam-2026-11-20/tree/plugins/ 实取树：telemetry/subprocess 零命中，cwd/sys.path 命中仅 cache_replay_admission.py 第 115/139 行管线自护注释。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-24」，SE27）。诚实口径不变：此为规则覆盖级静态核验，非实跑。
+
+## EXAM-20261124-02
+
+- 事件与类别：CVE-2026-135300——Pomerium MCP 令牌端点跳过客户端密钥校验（CWE-287 Improper Authentication）。类别：权限越界。公开日：2026-11-23（CVE 记录 2026-11-23T16:57:37Z 发布，VulnCheck CNA；VulnCheck 公告日 11/23/2026，无更早一手公开面）。影响：Pomerium 0.30.0–<0.34.0 的 MCP 令牌端点 /.pomerium/mcp/token 对 client_secret_basic 客户端跳过 client secret 校验，持有被截获授权码或刷新令牌的攻击者可用任意密钥兑换受害者的访问令牌（VulnCheck CVSS 4.0 9.1；0.34.0 修复）。来源：https://www.vulncheck.com/advisories/pomerium-0.30.0-before-0.34.0-missing-client-secret-verification-via-mcp-token-endpoint
+- 考题：对令牌端点的客户端认证摘要，V19 应判定：①端点对某种客户端认证方法（如 client_secret_basic）呈递了密钥却不做校验、任意密钥即可兑换令牌 ＝ fail（本件本体）；②各认证方法下呈递密钥均被校验、错误密钥被拒 ＝ pass 不误报；③密钥校验处理证据缺失 ＝ inconclusive。应引用被检令牌端点的密钥校验证据。
+- 标准：应有一条在册检查对被审对象的「呈递凭据的实际校验（认证方法分支不得跳过校验）」做判定。现头 20 插件无此检查：全文检索 client_secret/token_endpoint 在实取面零命中（oauth 仅命中 missing_authentication.py 的认证方法枚举值）；相邻的 v19.authentication.missing_for_critical_function 只判关键功能的认证「存在性」（authentication_status absent 才 fail，字段集 function_id/endpoint_id/criticality/exposure/authentication_status/authentication_method/inspection_source 装不下「方法存在但该分支跳过校验」）；v19.gateway.caller_overridable_managed_credential 判的是调用方供给值覆盖网关托管的上游凭据（方向与对象均不同）；v19.authorization.insufficient_enforcement_specificity 判授权缓存键／导入范围 specificity、v19.identity.unchecked_assertion_propagation 判身份断言传播，均不判令牌端点密钥校验，均不计覆盖。
+- 核验状态：未覆盖
+- 影响面：受影响系统/产品类型：带 MCP 令牌端点的身份感知代理／网关（Pomerium 类）的 OAuth 式令牌兑换面｜受影响人群：该代理的用户与运营者（被截获的授权码／刷新令牌可被任意密钥兑换为受害者访问令牌）、其后受保护的内部应用｜国内相关性：同型推断——国内为 MCP 接入部署身份代理／令牌端点的形态存在同型面；未见国内同型公开披露。
+- 核验证据落点：主链现头 67906f42943782a5d67a08dc9511736bde7e8985 下经连接器实读 plugins 目录清单（hidden_files/security-exam-2026-11-24/plugins_list.txt，20 件与 2026-11-23 钉版逐件全等）；全文检索沿用 hidden_files/security-exam-2026-11-20/tree/plugins/ 实取树：client_secret/secret_ver/token_endpoint 零命中，missing_authentication.py 字段集与判定口径自述如上。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-24」，SE28）。诚实口径不变：此为规则覆盖级静态核验，非实跑。
