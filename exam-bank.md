@@ -1,16 +1,17 @@
 # V19 安全考卷库（公开版）
 
 > 公开版说明：本文件为 V19 智能体安全审计项目「每日安全考卷」库的公开快照。
-> - 版本：2026-11-26 版（新增 EXAM-20261126-01 至 EXAM-20261126-08 八条、均判「未覆盖」；EXAM-20261120-05 经增刊补核改判「未核→事后覆盖」、公开日锚订正为 2026-07-08；EXAM-20261120-02／-03 来源链接错位勘误（同一错位链接）、EXAM-20261120-03 补核维持「未核」；勘误 ERR-20261117-01／ERR-20261117-02 沿用在册；正文与内部正本逐字节一致，差异仅本头部注记）
+> - 版本：2026-11-26 版（新增 EXAM-20261126-01 至 EXAM-20261126-08 八条、均判「未覆盖」；EXAM-20261120-05 经增刊补核改判「未核→事后覆盖」、公开日锚订正为 2026-07-08；EXAM-20261120-02／-03 来源链接错位勘误（同一错位链接）、EXAM-20261120-03 补核维持「未核」；勘误 ERR-20261117-01／ERR-20261117-02 沿用在册；EXAM-20261114-02 首公开日勘误 2026-11-13→2026-11-12（ERR-20261126-01）、EXAM-20261112-03 来源列改指一手 GHSA（ERR-20261126-02）；正文与内部正本逐字节一致，差异仅本头部注记）
 > - 勘误（2026-11-17）：EXAM-20261117-01 原判「预测命中」撤销、改判「事后覆盖」（GHSA-jq3q-62jc-fqq9 首次发布日为 2026-07-06，原记 2026-11-16 系全球库收录/CVE 发布日误作首发日）；详见正本该条勘误注记。
 > - 勘误二（2026-11-17，ERR-20261117-02）：EXAM-20261114-01 原判「预测命中」撤销、改判「事后覆盖」（GHSA-pj75-r769-qjv2 首次发布日为 2026-07-05，原记 2026-11-13 系 CVE 记录发布日误作首发日，与勘误一同型）；全库预测命中归零，详见正本该条勘误注记。
 > - 勘误三（2026-11-20，ERR-20261120-01）：EXAM-20261120-02 所列 noroxi 来源链接错位（指向 CVE-2026-123315、公开日 2026-11-06，与本条事件 CVE-2026-133196 不符），原链接留痕保留、-02 事实依据以 JetBrains CNA 批次 CVE 记录为准；EXAM-20261120-03 所列为同一错位链接、同日补同型勘误注记（原链接留痕保留、事实依据以 CVE 记录全文实读为准、状态「未核」不受影响）；同日增刊补核：EXAM-20261120-05 改判「事后覆盖」（仓库级首发 2026-07-08、SE9 检查引入晚于公开日）、EXAM-20261120-03 维持「未核」；详见正本各条注记。
-> - 统计时点：2026-11-26 10:23 CST
+> - 勘误四（2026-11-26，ERR-20261126-01／ERR-20261126-02）：EXAM-20261114-02 首公开日由 2026-11-13 更正为 2026-11-12（原记系 CVE 记录发布日；一手源 IBM 支持页 node/7296490 载 2026-11-12；外部验证者 Steven Zhao 2026-11-26 复算指出；核验状态「事后覆盖」不变）；EXAM-20261112-03 来源列由 patchwire 镜像改指仓库级一手公告 GHSA-7m4x-rv66-mxhh 与 GHSA-p9cv-8g75-4xcg；详见正本各条勘误注记。
+> - 统计时点：2026-11-26 12:56 CST
 > - 条目数：61 条（EXAM-20261111-01 至 EXAM-20261126-08）
 > - 核验状态分布（按条目「核验状态」字段计）：预测命中 1／事后覆盖 16／未覆盖 41／未核 3
 > - 成熟度标注：数据集（持续更新中）。覆盖核验为规则覆盖级静态核验，非端到端实跑；统计深度有限，不构成统计结论。
 > - 许可：CC-BY-4.0（署名 Sixu AI / V19 智能组织）
-> - 源文件 sha256（内部正本）：be2647b12c8fd34253cf6612c24f1d92ca663167691b2251002cdd6de0ef30a9
+> - 源文件 sha256（内部正本）：2041d138ae9e2c73c826bac58c729a374cebba3932a5bc9b18dcf9656ae14348
 
 ---
 
@@ -75,13 +76,14 @@
 
 ## EXAM-20261112-03
 
-- 事件与类别：MCP 参考服务器 @modelcontextprotocol/server-filesystem 校验后符号链接交换竞态（GHSA-7m4x-rv66-mxhh move_file 源路径未钉住／GHSA-p9cv-8g75-4xcg read_text_file 校验后符号链接交换，同批发布合并为一条）｜沙箱逃逸｜公开日 2026-11-11（维护者公告 07:24/07:28 UTC；受影响 <2.3.0 及日期版 <=2026.8.31，2.3.0 修复）｜来源 https://patchwire.monowire.dev/alerts/GHSA-7m4x-rv66-mxhh 与 https://patchwire.monowire.dev/alerts/GHSA-p9cv-8g75-4xcg
+- 事件与类别：MCP 参考服务器 @modelcontextprotocol/server-filesystem 校验后符号链接交换竞态（GHSA-7m4x-rv66-mxhh move_file 源路径未钉住／GHSA-p9cv-8g75-4xcg read_text_file 校验后符号链接交换，同批发布合并为一条）｜沙箱逃逸｜公开日 2026-11-11（维护者公告 07:24/07:28 UTC；受影响 <2.3.0 及日期版 <=2026.8.31，2.3.0 修复）｜来源 https://github.com/modelcontextprotocol/servers/security/advisories/GHSA-7m4x-rv66-mxhh 与 https://github.com/modelcontextprotocol/servers/security/advisories/GHSA-p9cv-8g75-4xcg（原指 patchwire 镜像，勘误 ERR-20261126-02 改指一手公告）
 - 考题：给定案例——文件工具先校验路径落在 allowedDirectories 内、随后使用时不钉住已校验对象，本地进程在校验与使用之间把父目录换成外指符号链接，读/移操作最终落在允许目录之外——V19 应检出「校验与使用非同一对象（check/use 竞态）致目录边界逃逸」并判 fail，finding 须引用被检路径处理证据；校验后钉住同一描述符/实路径的构造应不误报。
 - 标准：应有一条在册检查对被审案例的路径校验—使用一致性做判定。现头四插件无路径处理主题；管线自身读取面确有同族自护（manifest.py 单 fd O_NOFOLLOW 有界读、rules.py realpath 钉住、manifest/pipeline 拒绝符号链接），但那是管线保护自身输入的机制、不是对被审案例作判定的检查规则，按 EXAM-20261111-02 对 test_command_safety 的同一口径不计覆盖。
 - 核验状态：事后覆盖
 - 影响面：受影响系统/产品类型：MCP 参考文件系统服务器（server-filesystem 类）的智能体文件访问面｜受影响人群：部署该服务器的智能体运营者（allowedDirectories 外文件可被读出/移入）、其主机上的数据主体｜国内相关性：同型推断——该参考服务器在国内智能体开发中常被用作文件访问模板，同型面存在；未见国内同型公开披露。
 - 核验证据落点：同上现头实取面全文检索：symlink/realpath/NOFOLLOW 命中全部落在 manifest.py、rules.py、pipeline.py、acceptance.py 与 cache_replay_admission.py 的管线自护代码（拒绝/钉住管线自己的文件），四插件字段集无路径校验—使用一致性字段、无对应 RULE_ID。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-12」，SE6）。
 - 复核（2026-11-17，loop 第 189 轮，backlog SE6）：SE6 检查已随 PR #333 合入主链（合并提交 3602900291157218133626b475f69d175bffc54a、2026-11-17T03:04:01Z，list_commits 实读；批准依据 DEC-20261117-W001）。主链现头 cf0c293709134df2879ac5b671ebe5ad9fdde4f7 实取确认 plugins/path_validation_pinning.py 在册（RULE_ID v19.filesystem.path_validation_without_pinning，9,797 B、sha256 e72499c2…，与 SE6 第 80 轮钉版逐字节全等；套件 9,831 B cf8c10eb…、文档 5,548 B 46dc83d9… 同全等）；组装闭包实跑：作者套件 18/18 通过、独立探针 18 命名格＋B 组 24 格全枚举与第 90/175 轮逐格全等（GHSA 未钉住重开格判 fail 并引用路径证据、钉住同一对象判 pass 不误报、未校验/证据缺失判 inconclusive 不冒充、判定步 8 出现 0 次）、负对照（删插件）收集期 1 ERROR 判别成立、突变（fail→pass）恰红 5 条、全目录回归 Ran 961→979（恰 +18）坏名集 7 名逐名全等、acceptance 两树逐字一致。检查引入时点（2026-11-17 合入）晚于事件公开日 2026-11-11，故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-189/work/（fetch_main 三件、probe_main_out.json、se6/discover/acc 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑；插件只判供给的已检视操作摘要、不解析目标源码、不打开目标文件系统、不观察实际操作。
+- 勘误（2026-11-26，ERR-20261126-02）：本条「事件与类别」行来源列原指 patchwire 镜像（https://patchwire.monowire.dev/alerts/GHSA-7m4x-rv66-mxhh 与 https://patchwire.monowire.dev/alerts/GHSA-p9cv-8g75-4xcg），系镜像而非一手源；已改指仓库级一手公告 https://github.com/modelcontextprotocol/servers/security/advisories/GHSA-7m4x-rv66-mxhh 与 https://github.com/modelcontextprotocol/servers/security/advisories/GHSA-p9cv-8g75-4xcg（事件行原已列两 GHSA 编号、仅来源列滞后）。外部验证者 Steven Zhao 2026-11-26 独立复算指出（其自述今晨自其网络两次未能打开 GHSA 页、仅指出引用应指一手，不作链接失效断言）。本条核验状态（事后覆盖）与公开日（2026-11-11）不因本勘误变更。
 
 ## EXAM-20261113-01
 
@@ -125,13 +127,14 @@
 
 ## EXAM-20261114-02
 
-- 事件与类别：CVE-2026-110279 IBM ContextForge MCP Gateway 上游凭据被调用方请求头覆盖（CWE-287）｜权限越界｜公开日 2026-11-13（CVE 记录 2026-11-13T21:43:43Z 发布）｜来源 https://www.ibm.com/support/pages/node/7296490
+- 事件与类别：CVE-2026-110279 IBM ContextForge MCP Gateway 上游凭据被调用方请求头覆盖（CWE-287）｜权限越界｜公开日 2026-11-12（IBM 支持页 node/7296490 所载一手公开日；原记 2026-11-13 系 CVE 记录发布日，勘误 ERR-20261126-01）｜来源 https://www.ibm.com/support/pages/node/7296490
 - 考题：给定案例——网关始终把调用方 X-Upstream-Authorization 请求头改名为 Authorization 转发上游，已认证用户可替换网关托管的上游凭据、使上游请求以另一凭据发出并绕过逐用户权限与审计归属——V19 应检出「网关托管凭据可被调用方供给值覆盖」并判 fail，finding 须引用被检凭据处理证据；调用方供给的凭据头被剥离/忽略、只用网关托管凭据的构造应不误报。
 - 标准：应有一条在册检查对被审对象的「上游凭据来源不可被调用方覆盖」做判定。现头 10 插件无此检查：全文检索 credential/override 在实取面零命中（header 仅命中各插件的展品头格式校验）；相邻的 v19.authentication.missing_for_critical_function 核的是认证「存在性」（absent 才 fail），本件认证存在、缺陷在覆盖，不计覆盖；v19.authorization.missing_for_management_operation 核管理操作授权强制，亦装不下凭据覆盖面。
 - 核验状态：事后覆盖
 - 影响面：受影响系统/产品类型：MCP 网关（ContextForge 类）的托管上游凭据处理面｜受影响人群：网关运营者与逐用户权限主体（调用方请求头可替换托管凭据、绕过逐用户权限与审计归属）、上游服务提供方｜国内相关性：同型推断——国内 MCP 网关类产品存在同型面；未见国内同型公开披露。
 - 核验证据落点：主链现头 0f56f92b4f8288fa2ffc8ad2ab324861c2cb1656 下 research/audit_pipeline 经连接器实取 15 件全文检索（字节存 hidden_files/security-exam-2026-11-14/tree/）：10 插件 RULE_ID 清单无凭据处理主题，上述关键词零命中。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-14」，SE11）。
 - 复核（2026-11-15，loop 第 136 轮，backlog N43）：SE11 检查已随 PR #365 合入主链（落地提交 70e497a3552f873d9815b266535416185647d4f5、2026-11-14T10:06:37Z；合并提交 f3503e5f25ceef7ed508d42fde97c093f1941374、2026-11-14T14:28:28Z，list_commits 实读）。主链现头 f7d3382e 实取确认 plugins/gateway_credential_override.py 在册（RULE_ID v19.gateway.caller_overridable_managed_credential，11,206 B、sha256 c6223c92…，与 SE11 第 118 轮钉版逐字节全等；套件 11,571 B 7dce106a…、文档 7,011 B d0b00292… 同全等）；组装闭包实跑：作者套件 25/25 通过、独立探针 12/12 合预期（renamed 改名转发本体格判 fail 并引用凭据处理证据、forwarded 判 fail、stripped＋managed_only 判 pass 不误报、absent 判 pass、三 unknown 与两一致性矛盾格判 inconclusive 不冒充）、负对照（删插件）收集期 1 ERROR 判别成立、突变（renamed fail→pass）恰红 5 条记录、全目录回归 Ran 776/坏名集 64 与基线逐名全等、acceptance 输出与基线逐字一致。检查引入时点（2026-11-14）晚于事件公开日（2026-11-13），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-136/work/（fetch_main 三件、probe_se11_out.txt、discover 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑；插件只判供给的已检视凭据处理摘要、不解析目标源码、不探活网关、不发凭据请求。
+- 勘误（2026-11-26，ERR-20261126-01）：本条首公开日原记 2026-11-13 系 CVE 记录发布日（datePublished 2026-11-13T21:43:43Z），并非一手源首次公开日；一手源 IBM 支持页（https://www.ibm.com/support/pages/node/7296490）所载为 2026-11-12。外部验证者 Steven Zhao 2026-11-26 独立复算（自选五条首公开日核对）指出，「事件与类别」行公开日已更正为 2026-11-12 并注明依据。与 ERR-20261117-01／ERR-20261117-02 同型错误（只锚 CVE 日期、未以一手源为准），适用本库卷首写死口径。核验状态不因本勘误变更：覆盖检查引入时点（2026-11-14 合入）晚于更正后公开日（2026-11-12），仍判「事后覆盖」，全库汇总计数不变。
 
 ## EXAM-20261114-03
 
