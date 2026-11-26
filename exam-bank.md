@@ -125,13 +125,13 @@
 
 ## EXAM-20261114-02
 
-- 事件与类别：CVE-2026-110279 IBM ContextForge MCP Gateway 上游凭据被调用方请求头覆盖（CWE-287）｜权限越界｜公开日 2026-11-13（CVE 记录 2026-11-13T21:43:43Z 发布）｜来源 https://www.ibm.com/support/pages/node/7296490
+- 事件与类别：CVE-2026-110279 IBM ContextForge MCP Gateway 上游凭据被调用方请求头覆盖（CWE-287）｜权限越界｜首次公开日 2026-11-12（IBM 公告首发；CVE 记录于 2026-11-13T21:43:43Z 发布）｜来源 https://www.ibm.com/support/pages/node/7296490
 - 考题：给定案例——网关始终把调用方 X-Upstream-Authorization 请求头改名为 Authorization 转发上游，已认证用户可替换网关托管的上游凭据、使上游请求以另一凭据发出并绕过逐用户权限与审计归属——V19 应检出「网关托管凭据可被调用方供给值覆盖」并判 fail，finding 须引用被检凭据处理证据；调用方供给的凭据头被剥离/忽略、只用网关托管凭据的构造应不误报。
 - 标准：应有一条在册检查对被审对象的「上游凭据来源不可被调用方覆盖」做判定。现头 10 插件无此检查：全文检索 credential/override 在实取面零命中（header 仅命中各插件的展品头格式校验）；相邻的 v19.authentication.missing_for_critical_function 核的是认证「存在性」（absent 才 fail），本件认证存在、缺陷在覆盖，不计覆盖；v19.authorization.missing_for_management_operation 核管理操作授权强制，亦装不下凭据覆盖面。
 - 核验状态：事后覆盖
 - 影响面：受影响系统/产品类型：MCP 网关（ContextForge 类）的托管上游凭据处理面｜受影响人群：网关运营者与逐用户权限主体（调用方请求头可替换托管凭据、绕过逐用户权限与审计归属）、上游服务提供方｜国内相关性：同型推断——国内 MCP 网关类产品存在同型面；未见国内同型公开披露。
 - 核验证据落点：主链现头 0f56f92b4f8288fa2ffc8ad2ab324861c2cb1656 下 research/audit_pipeline 经连接器实取 15 件全文检索（字节存 hidden_files/security-exam-2026-11-14/tree/）：10 插件 RULE_ID 清单无凭据处理主题，上述关键词零命中。缺口已入 loop backlog 在队区（来源「安全考卷 2026-11-14」，SE11）。
-- 复核（2026-11-15，loop 第 136 轮，backlog N43）：SE11 检查已随 PR #365 合入主链（落地提交 70e497a3552f873d9815b266535416185647d4f5、2026-11-14T10:06:37Z；合并提交 f3503e5f25ceef7ed508d42fde97c093f1941374、2026-11-14T14:28:28Z，list_commits 实读）。主链现头 f7d3382e 实取确认 plugins/gateway_credential_override.py 在册（RULE_ID v19.gateway.caller_overridable_managed_credential，11,206 B、sha256 c6223c92…，与 SE11 第 118 轮钉版逐字节全等；套件 11,571 B 7dce106a…、文档 7,011 B d0b00292… 同全等）；组装闭包实跑：作者套件 25/25 通过、独立探针 12/12 合预期（renamed 改名转发本体格判 fail 并引用凭据处理证据、forwarded 判 fail、stripped＋managed_only 判 pass 不误报、absent 判 pass、三 unknown 与两一致性矛盾格判 inconclusive 不冒充）、负对照（删插件）收集期 1 ERROR 判别成立、突变（renamed fail→pass）恰红 5 条记录、全目录回归 Ran 776/坏名集 64 与基线逐名全等、acceptance 输出与基线逐字一致。检查引入时点（2026-11-14）晚于事件公开日（2026-11-13），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-136/work/（fetch_main 三件、probe_se11_out.txt、discover 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑；插件只判供给的已检视凭据处理摘要、不解析目标源码、不探活网关、不发凭据请求。
+- 复核（2026-11-15，loop 第 136 轮，backlog N43）：SE11 检查已随 PR #365 合入主链（落地提交 70e497a3552f873d9815b266535416185647d4f5、2026-11-14T10:06:37Z；合并提交 f3503e5f25ceef7ed508d42fde97c093f1941374、2026-11-14T14:28:28Z，list_commits 实读）。主链现头 f7d3382e 实取确认 plugins/gateway_credential_override.py 在册（RULE_ID v19.gateway.caller_overridable_managed_credential，11,206 B、sha256 c6223c92…，与 SE11 第 118 轮钉版逐字节全等；套件 11,571 B 7dce106a…、文档 7,011 B d0b00292… 同全等）；组装闭包实跑：作者套件 25/25 通过、独立探针 12/12 合预期（renamed 改名转发本体格判 fail 并引用凭据处理证据、forwarded 判 fail、stripped＋managed_only 判 pass 不误报、absent 判 pass、三 unknown 与两一致性矛盾格判 inconclusive 不冒充）、负对照（删插件）收集期 1 ERROR 判别成立、突变（renamed fail→pass）恰红 5 条记录、全目录回归 Ran 776/坏名集 64 与基线逐名全等、acceptance 输出与基线逐字一致。检查引入时点（2026-11-14）晚于 IBM 公告首次公开日（2026-11-12），故改判「事后覆盖」（非预测命中）。证据面：hidden_files/loop/round-136/work/（fetch_main 三件、probe_se11_out.txt、discover 日志）。诚实口径不变：此为规则覆盖级核验（静态在册＋套件/探针组装闭包实跑），非端到端实跑；插件只判供给的已检视凭据处理摘要、不解析目标源码、不探活网关、不发凭据请求。
 
 ## EXAM-20261114-03
 
