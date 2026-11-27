@@ -15,6 +15,22 @@
 //
 // The UI shows which path produced the narrative — the switching is a
 // feature, not a silent degradation.
+//
+// FIX 2026-11-27 (R-004 cloud-path repair, local changes only):
+//   (a) The App Check debug-token global is now assigned BEFORE the
+//       firebase/app-check module is imported, and the provider passed to
+//       initializeAppCheck is the canonically constructed
+//       ReCaptchaEnterpriseProvider (per the Firebase debug-provider docs,
+//       the SDK substitutes the debug provider when the global token is
+//       set). The previous build passed the literal string "debug" as an
+//       Enterprise site key and assigned the global after the import.
+//   (b) After App Check initialisation the engine fetches one App Check
+//       token explicitly, so an attestation failure surfaces as its own
+//       error (attribution: App Check vs model) instead of only appearing
+//       inside a generateContent failure.
+//   (c) engineStatus() now runs a real, cached cloud probe (App Check
+//       token + one minimal generation) instead of returning a hardcoded
+//       cloudAvailability: "unconfirmed".
 
 import { runLocalChecks } from "./local-checks.js";
 import {
@@ -150,6 +166,7 @@ function withTimeout(promise, ms, label) {
 }
 
 let cloudAiPromise = null;
+let appCheckRef = null;
 
 async function getCloudAi() {
   if (!FIREBASE_CONFIGURED) {
@@ -157,30 +174,56 @@ async function getCloudAi() {
   }
   if (!cloudAiPromise) {
     cloudAiPromise = (async () => {
+      // FIX 2026-11-27 (a): pin the debug token BEFORE the App Check
+      // module is loaded. The Firebase debug-provider documentation
+      // requires self.FIREBASE_APPCHECK_DEBUG_TOKEN to be set before
+      // initializeAppCheck(); setting it before the dynamic import as
+      // well removes any dependence on when the SDK first reads it.
+      if (APPCHECK_DEBUG) {
+        self.FIREBASE_APPCHECK_DEBUG_TOKEN = APPCHECK_DEBUG_TOKEN;
+      } else if (
+        !APPCHECK_SITE_KEY ||
+        APPCHECK_SITE_KEY.startsWith("REPLACE_ME")
+      ) {
+        throw new Error(
+          "APPCHECK_SITE_KEY is not configured (see js/firebase-config.js): " +
+            "production App Check needs a reCAPTCHA Enterprise site key"
+        );
+      }
       const { initializeApp } = await import("firebase/app");
-      const { initializeAppCheck, ReCaptchaEnterpriseProvider } = await import(
-        "firebase/app-check"
-      );
+      const { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken } =
+        await import("firebase/app-check");
       const { getAI, GoogleAIBackend } = await import("firebase/ai");
 
       const app = initializeApp(firebaseConfig);
-      if (APPCHECK_DEBUG) {
-        // Debug-token flow (accepted for the hackathon submission): present
-        // the pinned token registered in the Firebase Console under App
-        // Check -> Manage debug tokens (see firebase-config.js).
-        self.FIREBASE_APPCHECK_DEBUG_TOKEN = APPCHECK_DEBUG_TOKEN;
-        initializeAppCheck(app, { provider: new ReCaptchaEnterpriseProvider("debug"), isTokenAutoRefreshEnabled: true });
-      } else {
-        initializeAppCheck(app, {
-          provider: new ReCaptchaEnterpriseProvider(APPCHECK_SITE_KEY),
-          isTokenAutoRefreshEnabled: true,
-        });
+      // FIX 2026-11-27 (a): canonical provider construction in both
+      // modes. In debug mode the SDK substitutes the debug provider
+      // because the global token above is set; the provider argument is
+      // the production provider, never a literal "debug" site key.
+      const appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaEnterpriseProvider(APPCHECK_SITE_KEY),
+        isTokenAutoRefreshEnabled: true,
+      });
+      appCheckRef = appCheck;
+      // FIX 2026-11-27 (b): prove attestation up front. If the debug
+      // token is not registered in the console (or the app is not
+      // registered with App Check), this rejects here with the App
+      // Check error, instead of surfacing later as an opaque model
+      // error. A failure is recorded, not fatal: runCloud attempts
+      // will still be made and will report the same error per model.
+      try {
+        await getToken(appCheck);
+        cloudAttestation = { ok: true };
+      } catch (err) {
+        cloudAttestation = { ok: false, error: err.message };
       }
       return getAI(app, { backend: new GoogleAIBackend() });
     })();
   }
   return cloudAiPromise;
 }
+
+let cloudAttestation = null;
 
 /**
  * Try each candidate model in order; first success wins.
@@ -193,6 +236,9 @@ async function runCloud(userPrompt) {
   const { getGenerativeModel } = await import("firebase/ai");
   const ai = await getCloudAi();
   const attempts = [];
+  if (cloudAttestation && !cloudAttestation.ok) {
+    attempts.push(`app-check: ${cloudAttestation.error}`);
+  }
   for (const modelName of resolveCloudModels()) {
     try {
       const model = getGenerativeModel(ai, { model: modelName, systemInstruction: SYSTEM_PROMPT });
@@ -255,15 +301,58 @@ export async function runHybridAudit(specText) {
   }
 }
 
+// FIX 2026-11-27 (c): real cloud probe, run once and cached. A minimal
+// generation against the first candidate model, after the App Check
+// token fetch inside getCloudAi(). Only a probe that actually returns
+// text may report "confirmed".
+let cloudProbePromise = null;
+
+function probeCloud() {
+  if (!cloudProbePromise) {
+    cloudProbePromise = (async () => {
+      try {
+        const { getGenerativeModel } = await import("firebase/ai");
+        const ai = await getCloudAi();
+        if (cloudAttestation && !cloudAttestation.ok) {
+          return {
+            availability: "failed",
+            error: `App Check token fetch failed: ${cloudAttestation.error}`,
+          };
+        }
+        const modelName = resolveCloudModels()[0];
+        const model = getGenerativeModel(ai, {
+          model: modelName,
+          generationConfig: { maxOutputTokens: 16 },
+        });
+        const result = await withTimeout(
+          model.generateContent("Reply with the single word: ready"),
+          CLOUD_TIMEOUT_MS,
+          `cloud probe ${modelName}`
+        );
+        const text = result.response.text();
+        return text
+          ? { availability: "confirmed", model: modelName }
+          : { availability: "failed", error: "probe returned no text" };
+      } catch (err) {
+        return { availability: "failed", error: err.message };
+      }
+    })();
+  }
+  return cloudProbePromise;
+}
+
 export async function engineStatus() {
   const models = resolveCloudModels();
+  const probe = FIREBASE_CONFIGURED
+    ? await probeCloud()
+    : { availability: "unconfirmed" };
   return {
     nano: await nanoAvailability(),
     cloudConfigured: FIREBASE_CONFIGURED,
     cloudModel: models[0],
     cloudModels: models,
-    // As of the 2026-11-20 console check no candidate has produced a clean
-    // generation for this project yet — see js/firebase-config.js.
-    cloudAvailability: "unconfirmed",
+    // FIX 2026-11-27 (c): measured by probeCloud(), never hardcoded.
+    cloudAvailability: probe.availability,
+    cloudError: probe.error,
   };
 }

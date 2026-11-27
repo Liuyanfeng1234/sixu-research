@@ -30,7 +30,7 @@ export const firebaseConfig = {
 // For a production build, replace with a reCAPTCHA Enterprise site key.
 export const APPCHECK_DEBUG = true;
 export const APPCHECK_DEBUG_TOKEN = "19706F62-DE62-456C-B997-4FC8A482E79D";
-export const APPCHECK_SITE_KEY = "REPLACE_ME_RECAPTCHA_ENTERPRISE_SITE_KEY";
+export const APPCHECK_SITE_KEY = "6LdZLDUuAAAAAGHym_7r-XrnmS1jj8rGbUH7MNqh";
 
 // Cloud model used through Firebase AI Logic when the on-device path is
 // unavailable or returns an error.

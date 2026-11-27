@@ -36,10 +36,23 @@ async function refreshStatus() {
   }[status.nano];
   nanoChip.textContent = `On-device (Gemini Nano): ${nanoText}`;
   nanoChip.classList.toggle("on", status.nano === "available");
-  cloudChip.textContent = status.cloudConfigured
-    ? `Cloud (Firebase AI Logic · ${status.cloudModel}): configured — live availability unconfirmed`
-    : "Cloud (Firebase AI Logic): not configured — local paths still work";
-  cloudChip.classList.toggle("on", status.cloudConfigured);
+  // FIX 2026-11-27: the cloud chip now reports the measured probe
+  // result from engineStatus() instead of a static "live availability
+  // unconfirmed" string that could never clear.
+  if (!status.cloudConfigured) {
+    cloudChip.textContent =
+      "Cloud (Firebase AI Logic): not configured — local paths still work";
+    cloudChip.classList.toggle("on", false);
+  } else if (status.cloudAvailability === "confirmed") {
+    cloudChip.textContent = `Cloud (Firebase AI Logic · ${status.cloudModel}): live — App Check attested`;
+    cloudChip.classList.toggle("on", true);
+  } else if (status.cloudAvailability === "failed") {
+    cloudChip.textContent = `Cloud (Firebase AI Logic · ${status.cloudModel}): check failed — ${status.cloudError || "unknown error"}`;
+    cloudChip.classList.toggle("on", false);
+  } else {
+    cloudChip.textContent = `Cloud (Firebase AI Logic · ${status.cloudModel}): checking…`;
+    cloudChip.classList.toggle("on", false);
+  }
 }
 refreshStatus();
 
